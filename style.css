@@ -274,6 +274,7 @@ main {
 }
 
 .pokemon-card {
+    position: relative;
     background: var(--card-bg);
     border-radius: 16px;
     padding: 15px;
@@ -282,6 +283,16 @@ main {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     border: 3px solid transparent;
+}
+
+.pokemon-number {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: bold;
+    font-family: monospace;
 }
 
 .pokemon-card:hover {

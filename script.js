@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `<span class="type-badge bg-${type}">${translateType(type)}</span>`
             ).join('');
             card.innerHTML = `
+                <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
                 <img src="${pokemon.image}" alt="${pokemon.name}">
                 <h3>${pokemon.name}</h3>
                 <div class="type-badges">${typeBadges}</div>
