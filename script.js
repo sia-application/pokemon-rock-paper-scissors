@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player2NameGroup = document.getElementById('player2-name-group');
     const player1Label = document.getElementById('player1-label');
     const player2Label = document.getElementById('player2-label');
+    const pokemonSearchInput = document.getElementById('pokemon-search');
+    const searchSuggestions = document.getElementById('search-suggestions');
 
     // -- Game State --
     let player1Pokemon = null;
@@ -71,7 +73,58 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Name = '';
         renderPokemonGrid();
         restartBtn.addEventListener('click', resetGame);
+        pokemonSearchInput.addEventListener('input', handleSearchInput);
+        pokemonSearchInput.addEventListener('blur', () => {
+            // Delay to allow click on suggestion
+            setTimeout(() => hideSuggestions(), 200);
+        });
         updateInstruction();
+    }
+
+    function handleSearchInput(e) {
+        const query = e.target.value.trim().toLowerCase();
+        if (query.length === 0) {
+            hideSuggestions();
+            return;
+        }
+
+        const matches = pokemonData.filter(pokemon =>
+            pokemon.name.toLowerCase().includes(query)
+        );
+
+        if (matches.length > 0) {
+            showSuggestions(matches);
+        } else {
+            hideSuggestions();
+        }
+    }
+
+    function showSuggestions(matches) {
+        searchSuggestions.innerHTML = '';
+        matches.forEach(pokemon => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.innerHTML = `
+                <img src="${pokemon.image}" alt="${pokemon.name}">
+                <span class="pokemon-name">${pokemon.name}</span>
+                <span class="type-badge bg-${pokemon.type}">${translateType(pokemon.type)}</span>
+            `;
+            item.addEventListener('click', () => {
+                selectFromSearch(pokemon);
+            });
+            searchSuggestions.appendChild(item);
+        });
+        searchSuggestions.classList.remove('hidden');
+    }
+
+    function hideSuggestions() {
+        searchSuggestions.classList.add('hidden');
+    }
+
+    function selectFromSearch(pokemon) {
+        pokemonSearchInput.value = '';
+        hideSuggestions();
+        handlePokemonSelect(pokemon, null);
     }
 
     function updateInstruction() {
@@ -84,8 +137,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleRandomSelect() {
-        const randomPokemon = getRandomPokemon();
-        handlePokemonSelect(randomPokemon, null);
+        if (selectedPokemon !== null) {
+            // Already have a selection - confirm it
+            const cards = pokemonGrid.querySelectorAll('.pokemon-card');
+            let targetCard = null;
+            cards.forEach(card => {
+                if (card.dataset.pokemonId == selectedPokemon.id) {
+                    targetCard = card;
+                }
+            });
+            handlePokemonSelect(selectedPokemon, targetCard);
+        } else {
+            // No selection - pick a random pokemon
+            const randomPokemon = getRandomPokemon();
+            const cards = pokemonGrid.querySelectorAll('.pokemon-card');
+            let targetCard = null;
+            cards.forEach(card => {
+                if (card.dataset.pokemonId == randomPokemon.id) {
+                    targetCard = card;
+                }
+            });
+            handlePokemonSelect(randomPokemon, targetCard);
+        }
     }
 
     function renderPokemonGrid() {
@@ -274,6 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player2NameGroup.classList.add('hidden');
         player1NameInput.value = '';
         player2NameInput.value = '';
+        pokemonSearchInput.value = '';
+        hideSuggestions();
 
         // Reset game state
         player1Pokemon = null;
