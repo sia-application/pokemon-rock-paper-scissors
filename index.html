@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモンタイプじゃんけん</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="game-header">
+            <h1>ポケモンタイプじゃんけん</h1>
+            <p id="instruction-text">Player 1: ポケモンを えらぼう！</p>
+        </header>
+
+        <main id="game-area">
+            <!-- Pokemon Selection Grid -->
+            <div id="selection-screen" class="screen active">
+                <div class="name-inputs">
+                    <div class="name-input-group" id="player1-name-group">
+                        <label for="player1-name">Player 1</label>
+                        <input type="text" id="player1-name" placeholder="なまえ" maxlength="10">
+                    </div>
+                    <div class="name-input-group hidden" id="player2-name-group">
+                        <label for="player2-name">Player 2</label>
+                        <input type="text" id="player2-name" placeholder="なまえ" maxlength="10">
+                    </div>
+                </div>
+                <div class="pokemon-grid" id="pokemon-grid">
+                    <!-- Javascript will populate this -->
+                </div>
+            </div>
+
+            <!-- Battle Screen -->
+            <div id="battle-screen" class="screen hidden">
+                <div class="battle-arena">
+                    <div class="fighter player">
+                        <div class="fighter-card" id="player-fighter"></div>
+                        <p class="label" id="player1-label">Player 1</p>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="fighter cpu">
+                        <div class="fighter-card" id="cpu-fighter"></div>
+                        <p class="label" id="player2-label">Player 2</p>
+                    </div>
+                </div>
+                <div id="result-display" class="result-display hidden">
+                    <h2 id="result-message"></h2>
+                    <button id="restart-btn" class="btn-primary">もういちど あそぶ</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
