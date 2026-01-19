@@ -3,18 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -- Data --
     const pokemonData = [
-        { id: 1, name: 'フシギダネ', type: 'grass', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png' },
-        { id: 4, name: 'ヒトカゲ', type: 'fire', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png' },
-        { id: 7, name: 'ゼニガメ', type: 'water', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png' },
-        { id: 25, name: 'ピカチュウ', type: 'electric', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png' },
-        { id: 66, name: 'ワンリキー', type: 'fighting', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/66.png' },
-        { id: 74, name: 'イシツブテ', type: 'rock', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png' },
-        { id: 63, name: 'ケーシィ', type: 'psychic', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png' },
-        { id: 16, name: 'ポッポ', type: 'flying', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/16.png' },
-        { id: 27, name: 'サンド', type: 'ground', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/27.png' },
-        { id: 124, name: 'ルージュラ', type: 'ice', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/124.png' },
-        { id: 92, name: 'ゴース', type: 'ghost', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/92.png' },
-        { id: 147, name: 'ミニリュウ', type: 'dragon', image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/147.png' },
+        { id: 1, name: 'フシギダネ', types: ['grass', 'poison'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png' },
+        { id: 4, name: 'ヒトカゲ', types: ['fire'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png' },
+        { id: 6, name: 'リザードン', types: ['fire', 'flying'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png' },
+        { id: 7, name: 'ゼニガメ', types: ['water'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png' },
+        { id: 25, name: 'ピカチュウ', types: ['electric'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png' },
+        { id: 66, name: 'ワンリキー', types: ['fighting'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/66.png' },
+        { id: 74, name: 'イシツブテ', types: ['rock', 'ground'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png' },
+        { id: 63, name: 'ケーシィ', types: ['psychic'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png' },
+        { id: 16, name: 'ポッポ', types: ['normal', 'flying'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/16.png' },
+        { id: 27, name: 'サンド', types: ['ground'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/27.png' },
+        { id: 131, name: 'ラプラス', types: ['water', 'ice'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png' },
+        { id: 92, name: 'ゴース', types: ['ghost', 'poison'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/92.png' },
+        { id: 149, name: 'カイリュー', types: ['dragon', 'flying'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png' },
+        { id: 130, name: 'ギャラドス', types: ['water', 'flying'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png' },
+        { id: 143, name: 'カビゴン', types: ['normal'], image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png' },
     ];
 
     const typeChart = {
@@ -104,10 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
         matches.forEach(pokemon => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
+            const typeBadges = pokemon.types.map(type =>
+                `<span class="type-badge bg-${type}">${translateType(type)}</span>`
+            ).join('');
             item.innerHTML = `
                 <img src="${pokemon.image}" alt="${pokemon.name}">
                 <span class="pokemon-name">${pokemon.name}</span>
-                <span class="type-badge bg-${pokemon.type}">${translateType(pokemon.type)}</span>
+                <div class="suggestion-types">${typeBadges}</div>
             `;
             item.addEventListener('click', () => {
                 selectFromSearch(pokemon);
@@ -179,10 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'pokemon-card';
             card.dataset.pokemonId = pokemon.id;
+            const typeBadges = pokemon.types.map(type =>
+                `<span class="type-badge bg-${type}">${translateType(type)}</span>`
+            ).join('');
             card.innerHTML = `
                 <img src="${pokemon.image}" alt="${pokemon.name}">
                 <h3>${pokemon.name}</h3>
-                <span class="type-badge bg-${pokemon.type}">${translateType(pokemon.type)}</span>
+                <div class="type-badges">${typeBadges}</div>
             `;
             card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
             pokemonGrid.appendChild(card);
@@ -265,6 +274,10 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Label.textContent = player1Name;
         player2Label.textContent = player2Name;
 
+        // Set pokemon names
+        document.getElementById('player1-pokemon-name').textContent = player1.name;
+        document.getElementById('player2-pokemon-name').textContent = player2.name;
+
         // Transition to battle screen
         selectionScreen.classList.remove('active');
         selectionScreen.classList.add('hidden');
@@ -283,18 +296,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateFighterCard(element, pokemon) {
         element.innerHTML = `<img src="${pokemon.image}" alt="${pokemon.name}">`;
-        element.style.borderColor = `var(--type-${pokemon.type})`;
+        element.style.borderColor = `var(--type-${pokemon.types[0]})`;
     }
 
     function resolveBattle(p1, p2) {
-        const result = calculateEffectiveness(p1.type, p2.type);
+        const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
 
         let message = '';
         if (result === 'win') {
-            message = 'かち！';
+            message = `${player1Name} のかち！`;
             resultMessage.style.color = '#F44336';
         } else if (result === 'lose') {
-            message = 'まけ...';
+            message = `${player2Name} のかち！`;
             resultMessage.style.color = '#2196F3';
         } else {
             message = 'ひきわけ';
@@ -302,31 +315,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resultMessage.textContent = message;
+
+        // Show types and multipliers under each pokemon
+        const p1TypesStr = p1.types.map(t => translateType(t)).join('/');
+        const p2TypesStr = p2.types.map(t => translateType(t)).join('/');
+
+        document.getElementById('player1-types').textContent = p1TypesStr;
+        document.getElementById('player1-multiplier').textContent = `×${p1Multiplier}`;
+        document.getElementById('player2-types').textContent = p2TypesStr;
+        document.getElementById('player2-multiplier').textContent = `×${p2Multiplier}`;
+
         resultDisplay.classList.remove('hidden');
     }
 
-    function calculateEffectiveness(attackerType, defenderType) {
-        if (attackerType === defenderType) return 'draw';
-
-        const relationships = typeChart[attackerType];
-        if (!relationships) return 'draw'; // Unknown relationship
-
-        const multiplier = relationships[defenderType];
-
-        if (multiplier === 2) return 'win';
-        if (multiplier === 0.5 || multiplier === 0) return 'lose';
-
-        // If not explicitly defined, check reverse or default to draw/neutral
-        // For simple janken, if A beats B, then B should lose to A.
-        // But in Pokemon, it's not always symmetric (e.g. Bug vs Psychic).
-        // Let's check if the opponent has a 2x against us.
-
-        const defenseRelationships = typeChart[defenderType];
-        if (defenseRelationships && defenseRelationships[attackerType] === 2) {
-            return 'lose';
+    function calculateEffectiveness(attackerTypes, defenderTypes) {
+        // Calculate total multiplier for attacker vs defender
+        let attackerMultiplier = 1;
+        for (const atkType of attackerTypes) {
+            const relationships = typeChart[atkType];
+            if (relationships) {
+                for (const defType of defenderTypes) {
+                    if (relationships[defType] !== undefined) {
+                        attackerMultiplier *= relationships[defType];
+                    }
+                }
+            }
         }
 
-        return 'draw';
+        // Calculate total multiplier for defender vs attacker
+        let defenderMultiplier = 1;
+        for (const defType of defenderTypes) {
+            const relationships = typeChart[defType];
+            if (relationships) {
+                for (const atkType of attackerTypes) {
+                    if (relationships[atkType] !== undefined) {
+                        defenderMultiplier *= relationships[atkType];
+                    }
+                }
+            }
+        }
+
+        // Compare multipliers
+        let result;
+        if (attackerMultiplier > defenderMultiplier) {
+            result = 'win';
+        } else if (attackerMultiplier < defenderMultiplier) {
+            result = 'lose';
+        } else {
+            result = 'draw';
+        }
+
+        return {
+            result,
+            p1Multiplier: attackerMultiplier,
+            p2Multiplier: defenderMultiplier
+        };
     }
 
     function resetGame() {

@@ -230,6 +230,17 @@ main {
     font-size: 0.7rem;
 }
 
+.suggestion-types {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+}
+
+.suggestion-types .type-badge {
+    font-size: 0.65rem;
+    margin-left: 0;
+}
+
 /* Random Card in Grid */
 .random-card {
     background: linear-gradient(135deg, var(--accent-color), #FFD54F);
@@ -282,6 +293,13 @@ main {
     border-color: var(--primary-color);
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 8px 20px rgba(255, 82, 82, 0.3);
+}
+
+.type-badges {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
 }
 
 .pokemon-card img {
@@ -349,9 +367,32 @@ main {
     object-fit: contain;
 }
 
-.fighter .label {
+.fighter .player-name {
     font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.fighter .pokemon-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.95rem;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.fighter .pokemon-types {
     color: #666;
+    font-size: 0.85rem;
+    margin: 2px 0;
+}
+
+.fighter .pokemon-multiplier {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-top: 5px;
 }
 
 .result-display {
@@ -369,8 +410,46 @@ main {
 
 #result-message {
     font-size: 2rem;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: var(--primary-color);
+}
+
+.result-details {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    gap: 10px;
+}
+
+.detail-row:first-child {
+    border-bottom: 1px solid #ddd;
+}
+
+.detail-name {
+    font-weight: bold;
+    flex: 1;
+    text-align: left;
+}
+
+.detail-types {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.detail-multiplier {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    min-width: 40px;
+    text-align: right;
 }
 
 .btn-primary {
