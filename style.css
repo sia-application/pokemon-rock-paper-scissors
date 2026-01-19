@@ -149,6 +149,24 @@ main {
     display: none;
 }
 
+/* Random Card in Grid */
+.random-card {
+    background: linear-gradient(135deg, var(--accent-color), #FFD54F);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.random-card .random-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.random-card h3 {
+    color: #333;
+}
+
 /* Pokemon Grid */
 .pokemon-grid {
     display: grid;
@@ -177,6 +195,12 @@ main {
 .pokemon-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pokemon-card.selected {
+    border-color: var(--primary-color);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 82, 82, 0.3);
 }
 
 .pokemon-card img {

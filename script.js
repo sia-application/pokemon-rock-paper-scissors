@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Pokemon = null;
     let player1Name = '';
     let player2Name = '';
+    let selectedPokemon = null;
 
     // -- Init --
     initGame();
@@ -74,46 +75,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateInstruction() {
-        const name1 = player1NameInput.value.trim() || 'Player 1';
-        const name2 = player2NameInput.value.trim() || 'Player 2';
+        instructionText.textContent = 'ポケモンを えらぼう！';
+    }
 
-        if (player1Pokemon === null) {
-            instructionText.textContent = `${name1}: ポケモンを えらぼう！`;
-        } else {
-            instructionText.textContent = `${name2}: ポケモンを えらぼう！`;
-        }
+    function getRandomPokemon() {
+        const randomIndex = Math.floor(Math.random() * pokemonData.length);
+        return pokemonData[randomIndex];
+    }
+
+    function handleRandomSelect() {
+        const randomPokemon = getRandomPokemon();
+        handlePokemonSelect(randomPokemon, null);
     }
 
     function renderPokemonGrid() {
         pokemonGrid.innerHTML = '';
+
+        // Add random card first
+        const randomCard = document.createElement('div');
+        randomCard.className = 'pokemon-card random-card';
+        randomCard.innerHTML = `
+            <div class="random-icon">🎲</div>
+            <h3>おまかせ</h3>
+        `;
+        randomCard.addEventListener('click', handleRandomSelect);
+        pokemonGrid.appendChild(randomCard);
+
+        // Add pokemon cards
         pokemonData.forEach(pokemon => {
             const card = document.createElement('div');
             card.className = 'pokemon-card';
+            card.dataset.pokemonId = pokemon.id;
             card.innerHTML = `
                 <img src="${pokemon.image}" alt="${pokemon.name}">
                 <h3>${pokemon.name}</h3>
                 <span class="type-badge bg-${pokemon.type}">${translateType(pokemon.type)}</span>
             `;
-            card.addEventListener('click', () => handlePokemonSelect(pokemon));
+            card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
             pokemonGrid.appendChild(card);
         });
     }
 
-    function handlePokemonSelect(pokemon) {
+    function clearSelection() {
+        const cards = pokemonGrid.querySelectorAll('.pokemon-card');
+        cards.forEach(card => card.classList.remove('selected'));
+    }
+
+    function handlePokemonSelect(pokemon, cardElement) {
         if (player1Pokemon === null) {
-            // Player 1's turn - save name and pokemon
-            player1Name = player1NameInput.value.trim() || 'Player 1';
-            player1Pokemon = pokemon;
+            // Player 1's turn
+            if (selectedPokemon === null || selectedPokemon.id !== pokemon.id) {
+                // First click - select this pokemon
+                clearSelection();
+                selectedPokemon = pokemon;
+                if (cardElement) {
+                    cardElement.classList.add('selected');
+                }
+                instructionText.textContent = 'もういちど クリックで けってい！';
+            } else {
+                // Second click - confirm selection
+                player1Name = player1NameInput.value.trim() || 'Player 1';
+                player1Pokemon = pokemon;
+                selectedPokemon = null;
+                clearSelection();
 
-            // Switch to Player 2's name input
-            player1NameGroup.classList.add('hidden');
-            player2NameGroup.classList.remove('hidden');
+                // Switch to Player 2's name input
+                player1NameGroup.classList.add('hidden');
+                player2NameGroup.classList.remove('hidden');
 
-            updateInstruction();
+                updateInstruction();
+            }
         } else {
-            // Player 2's turn - save name and start battle
-            player2Name = player2NameInput.value.trim() || 'Player 2';
-            startGame(player1Pokemon, pokemon);
+            // Player 2's turn
+            if (selectedPokemon === null || selectedPokemon.id !== pokemon.id) {
+                // First click - select this pokemon
+                clearSelection();
+                selectedPokemon = pokemon;
+                if (cardElement) {
+                    cardElement.classList.add('selected');
+                }
+                instructionText.textContent = 'もういちど クリックで けってい！';
+            } else {
+                // Second click - confirm and start battle
+                player2Name = player2NameInput.value.trim() || 'Player 2';
+                startGame(player1Pokemon, pokemon);
+            }
         }
     }
 
@@ -233,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Pokemon = null;
         player1Name = '';
         player2Name = '';
+        selectedPokemon = null;
         updateInstruction();
     }
 });
