@@ -1349,28 +1349,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleRandomSelect() {
-        if (selectedPokemon !== null) {
-            // Already have a selection - confirm it
-            const cards = pokemonGrid.querySelectorAll('.pokemon-card');
-            let targetCard = null;
-            cards.forEach(card => {
-                if (card.dataset.pokemonId == selectedPokemon.id) {
-                    targetCard = card;
-                }
-            });
-            handlePokemonSelect(selectedPokemon, targetCard);
+        const randomCard = document.getElementById('random-card');
+
+        if (selectedPokemon && randomCard.classList.contains('selected')) {
+            // Already selected the random one - confirm it
+            handlePokemonSelect(selectedPokemon, randomCard);
         } else {
-            // No selection - pick a random pokemon
+            // No selection or different selection - pick a new random pokemon
             const randomPokemon = getRandomPokemon();
-            const cards = pokemonGrid.querySelectorAll('.pokemon-card');
-            let targetCard = null;
-            cards.forEach(card => {
-                if (card.dataset.pokemonId == randomPokemon.id) {
-                    targetCard = card;
-                }
-            });
-            handlePokemonSelect(randomPokemon, targetCard);
+
+            // Allow selection logic to run
+            handlePokemonSelect(randomPokemon, randomCard);
         }
+    }
+
+    function updateCardToPokemon(cardElement, pokemon) {
+        cardElement.classList.remove('random-card');
+        cardElement.innerHTML = getPokemonCardInnerHtml(pokemon);
+    }
+
+    function resetRandomCard(cardElement) {
+        cardElement.classList.add('random-card');
+        cardElement.innerHTML = getRandomCardContent();
+    }
+
+    function getRandomCardContent() {
+        return `
+            <div class="random-icon">🎲</div>
+            <h3>おまかせ</h3>
+        `;
+    }
+
+    function getPokemonCardInnerHtml(pokemon) {
+        const typeBadges = pokemon.types.map(type =>
+            `<span class="type-badge bg-${type}">${translateType(type)}</span>`
+        ).join('');
+
+        return `
+            <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
+            <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
+            <h3>${pokemon.name}</h3>
+            <div class="type-badges">${typeBadges}</div>
+        `;
     }
 
     function renderPokemonGrid() {
@@ -1380,10 +1400,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add random card first
         const randomCard = document.createElement('div');
         randomCard.className = 'pokemon-card random-card';
-        randomCard.innerHTML = `
-            <div class="random-icon">🎲</div>
-            <h3>おまかせ</h3>
-        `;
+        randomCard.id = 'random-card';
+        randomCard.innerHTML = getRandomCardContent();
         randomCard.addEventListener('click', handleRandomSelect);
         pokemonGrid.appendChild(randomCard);
 
@@ -1437,16 +1455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'pokemon-card';
         card.dataset.pokemonId = pokemon.id;
-        const typeBadges = pokemon.types.map(type =>
-            `<span class="type-badge bg-${type}">${translateType(type)}</span>`
-        ).join('');
-
-        card.innerHTML = `
-            <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
-            <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
-            <h3>${pokemon.name}</h3>
-            <div class="type-badges">${typeBadges}</div>
-        `;
+        card.innerHTML = getPokemonCardInnerHtml(pokemon);
         card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
         return card;
     }
@@ -1454,9 +1463,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearSelection() {
         const cards = pokemonGrid.querySelectorAll('.pokemon-card');
         cards.forEach(card => card.classList.remove('selected'));
+
+        // Reset random card if it exists and was transformed
+        const randomCard = document.getElementById('random-card');
+        if (randomCard && !randomCard.classList.contains('random-card')) {
+            resetRandomCard(randomCard);
+        }
     }
 
     function handlePokemonSelect(pokemon, cardElement) {
+        const randomCard = document.getElementById('random-card');
+
         if (player1Pokemon === null) {
             // Player 1's turn
             if (selectedPokemon === null || selectedPokemon.id !== pokemon.id) {
@@ -1466,7 +1483,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cardElement) {
                     cardElement.classList.add('selected');
                 }
+
+                // Show selection in random card
+                if (randomCard) {
+                    updateCardToPokemon(randomCard, pokemon);
+                    randomCard.classList.add('selected');
+                }
+
                 instructionText.textContent = 'もういちど クリックで けってい！';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm selection
                 player1Name = player1NameInput.value.trim() || 'Player 1';
@@ -1489,7 +1514,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cardElement) {
                     cardElement.classList.add('selected');
                 }
+
+                // Show selection in random card
+                if (randomCard) {
+                    updateCardToPokemon(randomCard, pokemon);
+                    randomCard.classList.add('selected');
+                }
+
                 instructionText.textContent = 'もういちど クリックで けってい！';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm and start battle
                 player2Name = player2NameInput.value.trim() || 'Player 2';
@@ -1527,6 +1560,9 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Label.textContent = player1Name;
         player2Label.textContent = player2Name;
 
+        // Update instruction
+        instructionText.textContent = 'バトル スタート！';
+
         // Set pokemon names
         document.getElementById('player1-pokemon-name').textContent = player1.name;
         document.getElementById('player2-pokemon-name').textContent = player2.name;
@@ -1554,6 +1590,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resolveBattle(p1, p2) {
         const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
+
+        // Update instruction
+        instructionText.textContent = 'しょうぶ あり！';
 
         let message = '';
         if (result === 'win') {
@@ -1651,6 +1690,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Name = '';
         player2Name = '';
         selectedPokemon = null;
+        clearSelection();
         updateInstruction();
     }
 });
