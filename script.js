@@ -1386,9 +1386,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isOmakaseMode) {
                 document.body.classList.add('omakase-active');
                 pokemonGrid.classList.add('disabled');
+                pokemonSearchInput.disabled = true;
+                pokemonSearchInput.placeholder = 'おまかせモードはけんさくできません';
             } else {
                 document.body.classList.remove('omakase-active');
                 pokemonGrid.classList.remove('disabled');
+                pokemonSearchInput.disabled = false;
+                pokemonSearchInput.placeholder = 'ポケモン名でけんさく';
             }
         }
         updateInstruction();
