@@ -52,51 +52,49 @@
                         <option value="gen9">パルデア (906-)</option>
                         <option value="hisui">ヒスイ</option>
                     </select>
-                    <div class="type-filters-wrapper">
-                        <select id="type1-filter">
-                            <option value="all">タイプ1</option>
-                            <option value="normal">ノーマル</option>
-                            <option value="fire">ほのお</option>
-                            <option value="water">みず</option>
-                            <option value="electric">でんき</option>
-                            <option value="grass">くさ</option>
-                            <option value="ice">こおり</option>
-                            <option value="fighting">かくとう</option>
-                            <option value="poison">どく</option>
-                            <option value="ground">じめん</option>
-                            <option value="flying">ひこう</option>
-                            <option value="psychic">エスパー</option>
-                            <option value="bug">むし</option>
-                            <option value="rock">いわ</option>
-                            <option value="ghost">ゴースト</option>
-                            <option value="dragon">ドラゴン</option>
-                            <option value="dark">あく</option>
-                            <option value="steel">はがね</option>
-                            <option value="fairy">フェアリー</option>
-                        </select>
-                        <select id="type2-filter">
-                            <option value="all">タイプ2</option>
-                            <option value="none">なし</option>
-                            <option value="normal">ノーマル</option>
-                            <option value="fire">ほのお</option>
-                            <option value="water">みず</option>
-                            <option value="electric">でんき</option>
-                            <option value="grass">くさ</option>
-                            <option value="ice">こおり</option>
-                            <option value="fighting">かくとう</option>
-                            <option value="poison">どく</option>
-                            <option value="ground">じめん</option>
-                            <option value="flying">ひこう</option>
-                            <option value="psychic">エスパー</option>
-                            <option value="bug">むし</option>
-                            <option value="rock">いわ</option>
-                            <option value="ghost">ゴースト</option>
-                            <option value="dragon">ドラゴン</option>
-                            <option value="dark">あく</option>
-                            <option value="steel">はがね</option>
-                            <option value="fairy">フェアリー</option>
-                        </select>
-                    </div>
+                    <select id="type1-filter">
+                        <option value="all">タイプ1</option>
+                        <option value="normal">ノーマル</option>
+                        <option value="fire">ほのお</option>
+                        <option value="water">みず</option>
+                        <option value="electric">でんき</option>
+                        <option value="grass">くさ</option>
+                        <option value="ice">こおり</option>
+                        <option value="fighting">かくとう</option>
+                        <option value="poison">どく</option>
+                        <option value="ground">じめん</option>
+                        <option value="flying">ひこう</option>
+                        <option value="psychic">エスパー</option>
+                        <option value="bug">むし</option>
+                        <option value="rock">いわ</option>
+                        <option value="ghost">ゴースト</option>
+                        <option value="dragon">ドラゴン</option>
+                        <option value="dark">あく</option>
+                        <option value="steel">はがね</option>
+                        <option value="fairy">フェアリー</option>
+                    </select>
+                    <select id="type2-filter">
+                        <option value="all">タイプ2</option>
+                        <option value="none">なし</option>
+                        <option value="normal">ノーマル</option>
+                        <option value="fire">ほのお</option>
+                        <option value="water">みず</option>
+                        <option value="electric">でんき</option>
+                        <option value="grass">くさ</option>
+                        <option value="ice">こおり</option>
+                        <option value="fighting">かくとう</option>
+                        <option value="poison">どく</option>
+                        <option value="ground">じめん</option>
+                        <option value="flying">ひこう</option>
+                        <option value="psychic">エスパー</option>
+                        <option value="bug">むし</option>
+                        <option value="rock">いわ</option>
+                        <option value="ghost">ゴースト</option>
+                        <option value="dragon">ドラゴン</option>
+                        <option value="dark">あく</option>
+                        <option value="steel">はがね</option>
+                        <option value="fairy">フェアリー</option>
+                    </select>
                     <input type="text" id="pokemon-search" placeholder="ポケモンを けんさく" autocomplete="off">
                     <div id="search-suggestions" class="search-suggestions hidden"></div>
                 </div>
@@ -104,6 +102,14 @@
                     <!-- Javascript will populate this -->
                 </div>
                 <div class="type-selection-grid hidden" id="type-selection-grid">
+                    <div class="type-rule-selector">
+                        <label class="rule-label" for="battle-rule-toggle">1タイプ戦</label>
+                        <label class="switch">
+                            <input type="checkbox" id="battle-rule-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <label class="rule-label" for="battle-rule-toggle">2タイプ戦</label>
+                    </div>
                     <button type="button" class="type-btn" data-type="normal">ノーマル</button>
                     <button type="button" class="type-btn" data-type="fire">ほのお</button>
                     <button type="button" class="type-btn" data-type="water">みず</button>
@@ -122,8 +128,12 @@
                     <button type="button" class="type-btn" data-type="dark">あく</button>
                     <button type="button" class="type-btn" data-type="steel">はがね</button>
                     <button type="button" class="type-btn" data-type="fairy">フェアリー</button>
+                    <div class="type-random-buttons">
+                        <button type="button" class="type-random-btn" id="random-type-btn">🎲 おまかせ</button>
+                    </div>
                     <button type="button" class="type-confirm-btn" id="type-confirm-btn">けってい</button>
                 </div>
+
             </div>
 
             <!-- Battle Screen -->

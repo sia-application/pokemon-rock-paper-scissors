@@ -1278,8 +1278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentType2Filter = 'all';
     let currentRegionFilter = 'all';
     let currentMode = 'full'; // 'full', 'omakase', 'type'
+    let typeBattleMode = 'double'; // 'single' or 'double'
     let player1SelectedTypes = []; // For Type Mode
     let player2SelectedTypes = []; // For Type Mode
+    let actionTimeout = null;
 
     const GENERATION_RANGES = {
         'all': { min: 0, max: 100000 },
@@ -1305,6 +1307,10 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Name = '';
         currentPokemonList = pokemonData;
         renderPokemonGrid();
+
+        // Header Reset
+        document.querySelector('.game-header').addEventListener('click', resetGame);
+
         restartBtn.addEventListener('click', resetGame);
         pokemonSearchInput.addEventListener('input', handleSearchInput);
         pokemonSearchInput.addEventListener('blur', () => {
@@ -1323,7 +1329,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('type-confirm-btn').addEventListener('click', confirmTypeSelection);
 
+        // Unified random button
+        document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
+
+        // Battle Rule Change (Toggle)
+        document.getElementById('battle-rule-toggle').addEventListener('change', handleBattleRuleChange);
+
         document.getElementById('cancel-selection-btn').addEventListener('click', () => {
+            // ... existing code ...
             // Only clear tentative selection, not full game reset unless intended
             // For now, clear current selection.
             clearSelection();
@@ -1383,47 +1396,111 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAllFilters();
     }
 
+    function handleBattleRuleChange(e) {
+        // Checked = Double (2 types), Unchecked = Single (1 type)
+        typeBattleMode = e.target.checked ? 'double' : 'single';
+
+        // Reset selections on rules change
+        player1SelectedTypes = [];
+        player2SelectedTypes = [];
+
+        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+
+        updateInstruction();
+    }
+
     function handleTypeButtonClick(e) {
         const btn = e.target;
         const type = btn.dataset.type;
 
         // Determine which player is selecting
-        const isPlayer1Turn = player1SelectedTypes.length === 0 ||
-            (player1SelectedTypes.length < 2 && player2SelectedTypes.length === 0);
-        const isPlayer2Turn = player1SelectedTypes.length > 0 && !player1Pokemon;
+        const isPlayer1Turn = !player1Pokemon;
+        // Selection limit based on rule
+        const limit = typeBattleMode === 'double' ? 2 : 1;
 
-        if (!player1Pokemon) {
-            // Player 1 is still selecting
-            if (btn.classList.contains('selected')) {
-                // Deselect
+        // Current player's selection array
+        let currentSelection = isPlayer1Turn ? player1SelectedTypes : player2SelectedTypes;
+
+        if (btn.classList.contains('selected')) {
+            // Deselect logic
+            // Only allow deselect if it belongs to current player
+            if (currentSelection.includes(type)) {
                 btn.classList.remove('selected');
-                player1SelectedTypes = player1SelectedTypes.filter(t => t !== type);
-            } else {
-                // Select (max 2)
-                if (player1SelectedTypes.length < 2) {
-                    btn.classList.add('selected');
-                    player1SelectedTypes.push(type);
-                }
-            }
-
-            // If at least 1 type selected, allow confirmation
-            if (player1SelectedTypes.length > 0) {
-                // Show confirm button or auto-proceed on double-click
-                // For now, use a single click to proceed after selection
+                currentSelection = currentSelection.filter(t => t !== type);
             }
         } else {
-            // Player 2 is selecting
-            if (btn.classList.contains('selected') && !player1SelectedTypes.includes(type)) {
-                // This is player 2's selection, deselect it
-                btn.classList.remove('selected');
-                player2SelectedTypes = player2SelectedTypes.filter(t => t !== type);
-            } else if (!player1SelectedTypes.includes(type)) {
-                // Select (max 2)
-                if (player2SelectedTypes.length < 2) {
-                    btn.classList.add('selected');
-                    player2SelectedTypes.push(type);
-                }
+            // Select logic
+            if (currentSelection.length < limit) {
+                // Add to selection
+                btn.classList.add('selected');
+                currentSelection.push(type);
+            } else if (limit === 1) {
+                // Single mode: Swap selection
+                const oldType = currentSelection[0];
+                const oldBtn = document.querySelector(`.type-btn[data-type="${oldType}"]`);
+                if (oldBtn) oldBtn.classList.remove('selected');
+                btn.classList.add('selected');
+                currentSelection = [type];
             }
+        }
+
+        // Update global selection array
+        if (isPlayer1Turn) {
+            player1SelectedTypes = currentSelection;
+        } else {
+            player2SelectedTypes = currentSelection;
+        }
+
+        updateInstruction();
+    }
+
+    function handleRandomTypeClick() {
+        // In double mode, randomly choose 1 or 2. In single mode, always 1.
+        const count = typeBattleMode === 'double' ? (Math.random() < 0.5 ? 1 : 2) : 1;
+        const types = [
+            'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
+            'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark',
+            'steel', 'fairy'
+        ];
+
+        // Select random unique types
+        const randomSelection = [];
+        while (randomSelection.length < count) {
+            const index = Math.floor(Math.random() * types.length);
+            const type = types[index];
+            if (!randomSelection.includes(type)) {
+                randomSelection.push(type);
+            }
+        }
+
+        // Update state and UI
+        if (!player1Pokemon) {
+            player1SelectedTypes = randomSelection;
+
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                const type = btn.dataset.type;
+                if (player1SelectedTypes.includes(type)) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        } else {
+            player2SelectedTypes = randomSelection;
+
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                const type = btn.dataset.type;
+                if (player1SelectedTypes.includes(type)) {
+                    // Keep P1 selection selected
+                    btn.classList.add('selected');
+                } else if (player2SelectedTypes.includes(type)) {
+                    // Select new random P2 types
+                    btn.classList.add('selected');
+                } else {
+                    // Deselect others
+                    btn.classList.remove('selected');
+                }
+            });
         }
 
         updateInstruction();
@@ -1448,11 +1525,9 @@ document.addEventListener('DOMContentLoaded', () => {
             player1NameGroup.classList.add('hidden');
             player2NameGroup.classList.remove('hidden');
 
-            // Reset type button states for player 2
+            // Reset type button states for player 2: Clear ALL selections so P2 doesn't see P1's choice
             document.querySelectorAll('.type-btn').forEach(btn => {
-                if (!player1SelectedTypes.includes(btn.dataset.type)) {
-                    btn.classList.remove('selected');
-                }
+                btn.classList.remove('selected');
             });
 
             updateInstruction();
@@ -1489,14 +1564,19 @@ document.addEventListener('DOMContentLoaded', () => {
         battleScreen.classList.add('active');
 
         // Display type cards instead of Pokemon
+        playerFighterEl.classList.remove('fighter-card');
+        cpuFighterEl.classList.remove('fighter-card');
         displayTypeFighter(playerFighterEl, p1, player1Name);
         displayTypeFighter(cpuFighterEl, p2, player2Name);
 
-        // Calculate result
-        const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
+        // Clear previous Pokemon names (from Full Mode)
+        document.getElementById('player1-pokemon-name').textContent = '';
+        document.getElementById('player2-pokemon-name').textContent = '';
 
-        // Display result
-        displayResult(result, p1Multiplier, p2Multiplier);
+        // Use standard resolveBattle logic for consistency
+        actionTimeout = setTimeout(() => {
+            resolveBattle(p1, p2);
+        }, 100);
     }
 
     function displayTypeFighter(element, fighter, name) {
@@ -1505,12 +1585,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
 
         element.innerHTML = `
-            <div class="fighter-card type-fighter-card">
-                <p class="fighter-name">${name}</p>
+            <div class="type-fighter-card">
                 <div class="type-fighter-types">
                     ${typeBadges}
                 </div>
-                <p class="fighter-pokemon-name">${fighter.name}</p>
             </div>
         `;
     }
@@ -1919,7 +1997,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFighterCard(cpuFighterEl, player2);
 
         // Resolve battle after a short delay
-        setTimeout(() => {
+        actionTimeout = setTimeout(() => {
             resolveBattle(player1, player2);
         }, 500);
     }
@@ -1970,9 +2048,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const p1TypesStr = p1.types.map(t => translateType(t)).join('/');
         const p2TypesStr = p2.types.map(t => translateType(t)).join('/');
 
-        document.getElementById('player1-types').textContent = p1TypesStr;
+        document.getElementById('player1-types').textContent = currentMode === 'type' ? '' : p1TypesStr;
         document.getElementById('player1-multiplier').textContent = `×${p1Multiplier}`;
-        document.getElementById('player2-types').textContent = p2TypesStr;
+        document.getElementById('player2-types').textContent = currentMode === 'type' ? '' : p2TypesStr;
         document.getElementById('player2-multiplier').textContent = `×${p2Multiplier}`;
 
         resultDisplay.classList.remove('hidden');
@@ -2023,6 +2101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGame() {
+        if (actionTimeout) clearTimeout(actionTimeout);
         battleScreen.classList.remove('active');
         battleScreen.classList.add('hidden');
 
@@ -2034,6 +2113,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cpuFighterEl.innerHTML = '';
         playerFighterEl.style.borderColor = '#ddd';
         cpuFighterEl.style.borderColor = '#ddd';
+        // Restore fighter-card class for standard modes
+        playerFighterEl.classList.add('fighter-card');
+        cpuFighterEl.classList.add('fighter-card');
 
         // Reset name inputs
         player1NameGroup.classList.remove('hidden');
@@ -2065,7 +2147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pokemonGrid = document.getElementById('pokemon-grid');
         const typeGrid = document.getElementById('type-selection-grid');
         const searchContainer = document.querySelector('.pokemon-search-container');
-        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input, .type-filters-wrapper');
+        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input');
 
         if (currentMode === 'type') {
             pokemonGrid.classList.add('hidden');
