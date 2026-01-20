@@ -1602,9 +1602,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('player2-pokemon-name').textContent = '';
 
         // Use standard resolveBattle logic for consistency
-        actionTimeout = setTimeout(() => {
+        // Use standard resolveBattle logic for consistency
+        // Show View Result Button instead of auto-timeout
+        const viewResultBtn = document.getElementById('view-result-btn');
+        viewResultBtn.classList.remove('hidden');
+        viewResultBtn.onclick = () => {
+            viewResultBtn.classList.add('hidden');
             resolveBattle(p1, p2);
-        }, 100);
+            viewResultBtn.onclick = null;
+        };
     }
 
     function displayTypeFighter(element, fighter, name) {
@@ -2025,10 +2031,16 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFighterCard(playerFighterEl, player1);
         updateFighterCard(cpuFighterEl, player2);
 
-        // Resolve battle after a short delay
-        actionTimeout = setTimeout(() => {
+
+
+        // Show View Result Button instead of auto-timeout
+        const viewResultBtn = document.getElementById('view-result-btn');
+        viewResultBtn.classList.remove('hidden');
+        viewResultBtn.onclick = () => {
+            viewResultBtn.classList.add('hidden');
             resolveBattle(player1, player2);
-        }, 500);
+            viewResultBtn.onclick = null;
+        };
     }
 
     function updateFighterCard(element, pokemon) {
@@ -2166,6 +2178,13 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Name = '';
         selectedPokemon = null;
         clearSelection();
+
+        // Reset View Result Button
+        const viewResultBtn = document.getElementById('view-result-btn');
+        if (viewResultBtn) {
+            viewResultBtn.classList.add('hidden');
+            viewResultBtn.onclick = null;
+        }
 
         // Reset Type Mode state
         player1SelectedTypes = [];
