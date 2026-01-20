@@ -33,6 +33,20 @@
                     </div>
                 </div>
                 <div class="pokemon-search-container">
+                    <select id="region-filter">
+                        <option value="all">すべてのちほう</option>
+                        <option value="gen1">カントー (1-151)</option>
+                        <option value="gen2">ジョウト (152-251)</option>
+                        <option value="gen3">ホウエン (252-386)</option>
+                        <option value="gen4">シンオウ (387-493)</option>
+                        <option value="gen5">イッシュ (494-649)</option>
+                        <option value="gen6">カロス (650-721)</option>
+                        <option value="gen7">アローラ (722-807)</option>
+                        <option value="unknown">不明 (808-809)</option>
+                        <option value="gen8">ガラル (810-905)</option>
+                        <option value="gen9">パルデア (906-)</option>
+                        <option value="hisui">ヒスイ</option>
+                    </select>
                     <input type="text" id="pokemon-search" placeholder="ポケモンを けんさく..." autocomplete="off">
                     <div id="search-suggestions" class="search-suggestions hidden"></div>
                 </div>

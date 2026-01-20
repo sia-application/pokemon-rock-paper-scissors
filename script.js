@@ -1272,6 +1272,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadedCount = 0;
     const BATCH_SIZE = 50;
     let observer = null;
+    let currentPokemonList = pokemonData;
+
+    const GENERATION_RANGES = {
+        'all': { min: 0, max: 100000 },
+        'gen1': { min: 1, max: 151 },
+        'gen2': { min: 152, max: 251 },
+        'gen3': { min: 252, max: 386 },
+        'gen4': { min: 387, max: 493 },
+        'gen5': { min: 494, max: 649 },
+        'gen6': { min: 650, max: 721 },
+        'gen7': { min: 722, max: 807 },
+        'unknown': { min: 808, max: 809 },
+        'gen8': { min: 810, max: 905 },
+        'gen9': { min: 906, max: 1025 },
+        'hisui': { min: 899, max: 905 } // Special Handling usually, but adhering to IDs here
+    };
 
     // -- Init --
     initGame();
@@ -1280,6 +1296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Pokemon = null;
         player1Name = '';
         player2Name = '';
+        currentPokemonList = pokemonData;
         renderPokemonGrid();
         restartBtn.addEventListener('click', resetGame);
         pokemonSearchInput.addEventListener('input', handleSearchInput);
@@ -1287,7 +1304,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // Delay to allow click on suggestion
             setTimeout(() => hideSuggestions(), 200);
         });
+
+        document.getElementById('region-filter').addEventListener('change', handleRegionChange);
+
         updateInstruction();
+    }
+
+    function handleRegionChange(e) {
+        const region = e.target.value;
+        const range = GENERATION_RANGES[region];
+
+        // Reset search
+        pokemonSearchInput.value = '';
+
+        if (region === 'all') {
+            currentPokemonList = pokemonData;
+        } else if (region === 'hisui') {
+            // Custom filtering for Hisui
+            currentPokemonList = pokemonData.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
+        } else {
+            currentPokemonList = pokemonData.filter(p => p.id >= range.min && p.id <= range.max);
+        }
+
+        renderPokemonGrid(currentPokemonList);
     }
 
     function handleSearchInput(e) {
@@ -1344,8 +1383,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getRandomPokemon() {
-        const randomIndex = Math.floor(Math.random() * pokemonData.length);
-        return pokemonData[randomIndex];
+        // Use currentPokemonList to respect the selected region filter
+        const listToSample = currentPokemonList && currentPokemonList.length > 0 ? currentPokemonList : pokemonData;
+        const randomIndex = Math.floor(Math.random() * listToSample.length);
+        return listToSample[randomIndex];
     }
 
     function handleRandomSelect() {
@@ -1393,7 +1434,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function renderPokemonGrid() {
+    function renderPokemonGrid(list = null) {
+        if (list) {
+            currentPokemonList = list;
+        } else if (!currentPokemonList) {
+            currentPokemonList = pokemonData;
+        }
+
         pokemonGrid.innerHTML = '';
         loadedCount = 0;
 
@@ -1424,7 +1471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadNextBatch() {
-        const nextBatch = pokemonData.slice(loadedCount, loadedCount + BATCH_SIZE);
+        const nextBatch = currentPokemonList.slice(loadedCount, loadedCount + BATCH_SIZE);
 
         // Remove sentinel if it exists
         const sentinel = document.getElementById('grid-sentinel');
@@ -1441,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadedCount += nextBatch.length;
 
         // Add sentinel if there are more items
-        if (loadedCount < pokemonData.length) {
+        if (loadedCount < currentPokemonList.length) {
             const newSentinel = document.createElement('div');
             newSentinel.id = 'grid-sentinel';
             newSentinel.style.gridColumn = '1 / -1';
