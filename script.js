@@ -1610,8 +1610,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show View Result Button instead of auto-timeout
         const viewResultBtn = document.getElementById('view-result-btn');
         viewResultBtn.classList.remove('hidden');
+        viewResultBtn.style.display = 'inline-block';
         viewResultBtn.onclick = () => {
-            viewResultBtn.classList.add('hidden');
+            viewResultBtn.style.display = 'none';
             resolveBattle(p1, p2);
             viewResultBtn.onclick = null;
         };
@@ -2051,8 +2052,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show View Result Button instead of auto-timeout
         const viewResultBtn = document.getElementById('view-result-btn');
         viewResultBtn.classList.remove('hidden');
+        viewResultBtn.style.display = 'inline-block';
         viewResultBtn.onclick = () => {
-            viewResultBtn.classList.add('hidden');
+            viewResultBtn.style.display = 'none';
             resolveBattle(player1, player2);
             viewResultBtn.onclick = null;
         };
@@ -2064,6 +2066,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resolveBattle(p1, p2) {
+        // Ensure View Result button is hidden
+        const viewResultBtn = document.getElementById('view-result-btn');
+        if (viewResultBtn) viewResultBtn.style.display = 'none';
+
         const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
 
         // Update instruction
@@ -2195,9 +2201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         clearSelection();
 
         // Reset View Result Button
+        // Reset View Result Button
         const viewResultBtn = document.getElementById('view-result-btn');
         if (viewResultBtn) {
-            viewResultBtn.classList.add('hidden');
+            viewResultBtn.style.display = 'none';
             viewResultBtn.onclick = null;
         }
 

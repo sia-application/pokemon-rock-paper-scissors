@@ -1174,3 +1174,17 @@ body.omakase-active .card-close-btn {
     background-color: var(--type-normal) !important;
     color: #333 !important;
 }
+
+/* Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Ensure View Result Button works */
+#view-result-btn {
+    display: inline-block;
+}
+
+#view-result-btn.hidden {
+    display: none !important;
+}
