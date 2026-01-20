@@ -234,6 +234,44 @@ main {
     padding-right: 3rem;
 }
 
+.omakase-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    padding: 8px 16px;
+    border-radius: 25px;
+    border: 3px solid #ddd;
+    font-weight: bold;
+    color: #555;
+    white-space: nowrap;
+}
+
+.omakase-toggle-wrapper input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+/* Omakase Mode: Disable Grid Interaction */
+.pokemon-grid.disabled .pokemon-card:not(#random-card) {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(0.8);
+}
+
+.pokemon-grid.disabled .random-card {
+    /* Random card stays active */
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
+
+/* Omakase Mode: Hide Cancel Button */
+body.omakase-active .card-close-btn {
+    display: none !important;
+}
+
 @media (min-width: 600px) {
     .pokemon-search-container select {
         min-width: 200px;

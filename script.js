@@ -1273,6 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const BATCH_SIZE = 50;
     let observer = null;
     let currentPokemonList = pokemonData;
+    let isOmakaseMode = false;
 
     const GENERATION_RANGES = {
         'all': { min: 0, max: 100000 },
@@ -1306,6 +1307,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('region-filter').addEventListener('change', handleRegionChange);
+        document.getElementById('omakase-mode-toggle').addEventListener('change', handleOmakaseModeToggle);
+
         document.getElementById('cancel-selection-btn').addEventListener('click', () => {
             // Only clear tentative selection, not full game reset unless intended
             // For now, clear current selection.
@@ -1322,6 +1325,21 @@ document.addEventListener('DOMContentLoaded', () => {
         updateInstruction();
     }
 
+    function handleOmakaseModeToggle(e) {
+        isOmakaseMode = e.target.checked;
+        const grid = document.getElementById('pokemon-grid');
+
+        if (isOmakaseMode) {
+            document.body.classList.add('omakase-active');
+            grid.classList.add('disabled');
+            clearSelection();
+            selectedPokemon = null;
+            updateInstruction();
+        } else {
+            document.body.classList.remove('omakase-active');
+            grid.classList.remove('disabled');
+        }
+    }
     function handleRegionChange(e) {
         const region = e.target.value;
         const range = GENERATION_RANGES[region];
