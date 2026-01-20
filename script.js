@@ -1982,6 +1982,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     toggleFilters(true); // Disable filters for Player 2 selection if NOT in full mode
                 } else {
                     document.getElementById('mode-select').disabled = true; // Disable only mode select in full mode
+
+                    // Reset filters for Player 2
+                    currentRegionFilter = 'all';
+                    currentType1Filter = 'all';
+                    currentType2Filter = 'all';
+
+                    document.getElementById('region-filter').value = 'all';
+                    document.getElementById('type1-filter').value = 'all';
+                    document.getElementById('type2-filter').value = 'all';
+
+                    applyAllFilters();
                 }
             }
         } else {
