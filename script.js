@@ -1274,6 +1274,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let observer = null;
     let currentPokemonList = pokemonData;
     let isOmakaseMode = false;
+    let currentType1Filter = 'all';
+    let currentType2Filter = 'all';
+    let currentRegionFilter = 'all';
+    let currentMode = 'full'; // 'full', 'omakase', 'type'
+    let player1SelectedTypes = []; // For Type Mode
+    let player2SelectedTypes = []; // For Type Mode
 
     const GENERATION_RANGES = {
         'all': { min: 0, max: 100000 },
@@ -1307,7 +1313,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('region-filter').addEventListener('change', handleRegionChange);
-        document.getElementById('omakase-mode-toggle').addEventListener('change', handleOmakaseModeToggle);
+        document.getElementById('type1-filter').addEventListener('change', handleType1Change);
+        document.getElementById('type2-filter').addEventListener('change', handleType2Change);
+        document.getElementById('mode-select').addEventListener('change', handleModeChange);
+
+        // Type button click handlers for Type Mode
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', handleTypeButtonClick);
+        });
+        document.getElementById('type-confirm-btn').addEventListener('click', confirmTypeSelection);
 
         document.getElementById('cancel-selection-btn').addEventListener('click', () => {
             // Only clear tentative selection, not full game reset unless intended
@@ -1325,45 +1339,213 @@ document.addEventListener('DOMContentLoaded', () => {
         updateInstruction();
     }
 
-    function handleOmakaseModeToggle(e) {
-        isOmakaseMode = e.target.checked;
-        const grid = document.getElementById('pokemon-grid');
+    function handleModeChange(e) {
+        const mode = e.target.value;
+        currentMode = mode;
+        isOmakaseMode = (mode === 'omakase');
+        const pokemonGrid = document.getElementById('pokemon-grid');
+        const typeGrid = document.getElementById('type-selection-grid');
+        const searchContainer = document.querySelector('.pokemon-search-container');
+        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input, .type-filters-wrapper');
 
-        if (isOmakaseMode) {
-            document.body.classList.add('omakase-active');
-            grid.classList.add('disabled');
-            clearSelection();
-            selectedPokemon = null;
-            updateInstruction();
-        } else {
+        // Reset selections
+        clearSelection();
+        selectedPokemon = null;
+        player1SelectedTypes = [];
+        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+
+        if (mode === 'type') {
+            // Type Mode: Show type grid, hide pokemon grid and filters
+            pokemonGrid.classList.add('hidden');
+            typeGrid.classList.remove('hidden');
+            filterElements.forEach(el => el.style.display = 'none');
             document.body.classList.remove('omakase-active');
-            grid.classList.remove('disabled');
+            pokemonGrid.classList.remove('disabled');
+        } else {
+            // Full or Omakase Mode: Show pokemon grid, hide type grid
+            pokemonGrid.classList.remove('hidden');
+            typeGrid.classList.add('hidden');
+            filterElements.forEach(el => el.style.display = '');
+
+            if (isOmakaseMode) {
+                document.body.classList.add('omakase-active');
+                pokemonGrid.classList.add('disabled');
+            } else {
+                document.body.classList.remove('omakase-active');
+                pokemonGrid.classList.remove('disabled');
+            }
         }
+        updateInstruction();
     }
     function handleRegionChange(e) {
-        const region = e.target.value;
+        currentRegionFilter = e.target.value;
+        pokemonSearchInput.value = '';
+        applyAllFilters();
+    }
+
+    function handleTypeButtonClick(e) {
+        const btn = e.target;
+        const type = btn.dataset.type;
+
+        // Determine which player is selecting
+        const isPlayer1Turn = player1SelectedTypes.length === 0 ||
+            (player1SelectedTypes.length < 2 && player2SelectedTypes.length === 0);
+        const isPlayer2Turn = player1SelectedTypes.length > 0 && !player1Pokemon;
+
+        if (!player1Pokemon) {
+            // Player 1 is still selecting
+            if (btn.classList.contains('selected')) {
+                // Deselect
+                btn.classList.remove('selected');
+                player1SelectedTypes = player1SelectedTypes.filter(t => t !== type);
+            } else {
+                // Select (max 2)
+                if (player1SelectedTypes.length < 2) {
+                    btn.classList.add('selected');
+                    player1SelectedTypes.push(type);
+                }
+            }
+
+            // If at least 1 type selected, allow confirmation
+            if (player1SelectedTypes.length > 0) {
+                // Show confirm button or auto-proceed on double-click
+                // For now, use a single click to proceed after selection
+            }
+        } else {
+            // Player 2 is selecting
+            if (btn.classList.contains('selected') && !player1SelectedTypes.includes(type)) {
+                // This is player 2's selection, deselect it
+                btn.classList.remove('selected');
+                player2SelectedTypes = player2SelectedTypes.filter(t => t !== type);
+            } else if (!player1SelectedTypes.includes(type)) {
+                // Select (max 2)
+                if (player2SelectedTypes.length < 2) {
+                    btn.classList.add('selected');
+                    player2SelectedTypes.push(type);
+                }
+            }
+        }
+
+        updateInstruction();
+    }
+
+    function confirmTypeSelection() {
+        if (currentMode !== 'type') return;
+
+        if (!player1Pokemon && player1SelectedTypes.length > 0) {
+            // Confirm player 1 selection
+            player1Pokemon = {
+                name: getTypeDisplayName(player1SelectedTypes),
+                types: player1SelectedTypes,
+                image: null,
+                isTypeOnly: true
+            };
+
+            // Get player 1 name
+            player1Name = player1NameInput.value.trim() || 'トレーナー 1';
+
+            // Show player 2 name input
+            player1NameGroup.classList.add('hidden');
+            player2NameGroup.classList.remove('hidden');
+
+            // Reset type button states for player 2
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                if (!player1SelectedTypes.includes(btn.dataset.type)) {
+                    btn.classList.remove('selected');
+                }
+            });
+
+            updateInstruction();
+        } else if (player1Pokemon && player2SelectedTypes.length > 0) {
+            // Confirm player 2 selection and start battle
+            const player2Pokemon = {
+                name: getTypeDisplayName(player2SelectedTypes),
+                types: player2SelectedTypes,
+                image: null,
+                isTypeOnly: true
+            };
+
+            player2Name = player2NameInput.value.trim() || 'トレーナー 2';
+
+            startTypeBattle(player1Pokemon, player2Pokemon);
+        }
+    }
+
+    function getTypeDisplayName(types) {
+        const typeNames = {
+            'normal': 'ノーマル', 'fire': 'ほのお', 'water': 'みず', 'electric': 'でんき',
+            'grass': 'くさ', 'ice': 'こおり', 'fighting': 'かくとう', 'poison': 'どく',
+            'ground': 'じめん', 'flying': 'ひこう', 'psychic': 'エスパー', 'bug': 'むし',
+            'rock': 'いわ', 'ghost': 'ゴースト', 'dragon': 'ドラゴン', 'dark': 'あく',
+            'steel': 'はがね', 'fairy': 'フェアリー'
+        };
+        return types.map(t => typeNames[t]).join(' / ');
+    }
+
+    function startTypeBattle(p1, p2) {
+        selectionScreen.classList.remove('active');
+        selectionScreen.classList.add('hidden');
+        battleScreen.classList.remove('hidden');
+        battleScreen.classList.add('active');
+
+        // Display type cards instead of Pokemon
+        displayTypeFighter(playerFighterEl, p1, player1Name);
+        displayTypeFighter(cpuFighterEl, p2, player2Name);
+
+        // Calculate result
+        const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
+
+        // Display result
+        displayResult(result, p1Multiplier, p2Multiplier);
+    }
+
+    function displayTypeFighter(element, fighter, name) {
+        const typeBadges = fighter.types.map(type =>
+            `<span class="type-badge ${type}">${getTypeDisplayName([type])}</span>`
+        ).join('');
+
+        element.innerHTML = `
+            <div class="fighter-card type-fighter-card">
+                <p class="fighter-name">${name}</p>
+                <div class="type-fighter-types">
+                    ${typeBadges}
+                </div>
+                <p class="fighter-pokemon-name">${fighter.name}</p>
+            </div>
+        `;
+    }
+
+    function handleType1Change(e) {
+        currentType1Filter = e.target.value;
+        pokemonSearchInput.value = '';
+        applyAllFilters();
+    }
+
+    function handleType2Change(e) {
+        currentType2Filter = e.target.value;
+        pokemonSearchInput.value = '';
+        applyAllFilters();
+    }
+
+    function applyAllFilters() {
+        let filtered = pokemonData;
+
+        // Apply region filter
+        const region = currentRegionFilter;
         const range = GENERATION_RANGES[region];
 
-        // Reset search
-        pokemonSearchInput.value = '';
-
         if (region === 'all') {
-            currentPokemonList = pokemonData;
+            // No region filter
         } else if (region === 'gen7') {
-            // Include Alolan forms
-            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ'));
+            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ'));
         } else if (region === 'gen8') {
-            // Include Galarian forms
-            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル'));
+            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル'));
         } else if (region === 'gen9') {
-            // Include Paldean forms
-            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア'));
+            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア'));
         } else if (region === 'hisui') {
-            // Custom filtering for Hisui
-            currentPokemonList = pokemonData.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
+            filtered = filtered.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
         } else {
-            // Standard generations: Exclude regional forms that might share IDs or be in range
-            currentPokemonList = pokemonData.filter(p =>
+            filtered = filtered.filter(p =>
                 p.id >= range.min &&
                 p.id <= range.max &&
                 !p.name.includes('アローラ') &&
@@ -1373,6 +1555,22 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
+        // Apply type 1 filter
+        if (currentType1Filter !== 'all') {
+            filtered = filtered.filter(p => p.types.includes(currentType1Filter));
+        }
+
+        // Apply type 2 filter
+        if (currentType2Filter !== 'all') {
+            if (currentType2Filter === 'none') {
+                // Only single-type Pokemon
+                filtered = filtered.filter(p => p.types.length === 1);
+            } else {
+                filtered = filtered.filter(p => p.types.includes(currentType2Filter));
+            }
+        }
+
+        currentPokemonList = filtered;
         renderPokemonGrid(currentPokemonList);
     }
 
@@ -1472,7 +1670,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRandomCardContent() {
         return `
-            <div class="random-icon">🎲</div>
+            <div class="monster-ball-icon">
+                <div class="half-top"></div>
+                <div class="half-bottom"></div>
+                <div class="center-line"></div>
+                <div class="center-circle"></div>
+            </div>
             <h3>おまかせ</h3>
         `;
     }
@@ -1628,6 +1831,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 player1NameGroup.classList.add('hidden');
                 player2NameGroup.classList.remove('hidden');
 
+                // Change header color for Player 2
+                document.querySelector('.game-header').classList.add('player2-turn');
+
                 updateInstruction();
             }
         } else {
@@ -1692,6 +1898,9 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Label.textContent = player1Name;
         player2Label.textContent = player2Name;
 
+        // Reset header color for battle
+        document.querySelector('.game-header').classList.remove('player2-turn');
+
         // Update instruction
         instructionText.textContent = 'バトル スタート！';
 
@@ -1727,15 +1936,32 @@ document.addEventListener('DOMContentLoaded', () => {
         instructionText.textContent = 'しょうぶ あり！';
 
         let message = '';
+        const gameHeader = document.querySelector('.game-header');
+
         if (result === 'win') {
             message = `${player1Name} のかち！`;
             resultMessage.style.color = '#F44336';
+
+            // Player 1 Wins (Red)
+            gameHeader.classList.remove('player2-turn');
+            restartBtn.style.background = 'var(--primary-color)';
+
         } else if (result === 'lose') {
             message = `${player2Name} のかち！`;
             resultMessage.style.color = '#2196F3';
+
+            // Player 2 Wins (Blue)
+            gameHeader.classList.add('player2-turn');
+            restartBtn.style.background = 'var(--secondary-color)';
+
         } else {
             message = 'ひきわけ';
             resultMessage.style.color = '#9E9E9E';
+
+            // Draw - Gray Header and Button
+            gameHeader.classList.remove('player2-turn');
+            gameHeader.classList.add('draw-result');
+            restartBtn.style.background = '#9E9E9E';
         }
 
         resultMessage.textContent = message;
@@ -1812,6 +2038,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset name inputs
         player1NameGroup.classList.remove('hidden');
         player2NameGroup.classList.add('hidden');
+
+        // Reset header color
+        document.querySelector('.game-header').classList.remove('player2-turn');
+        document.querySelector('.game-header').classList.remove('draw-result');
+        restartBtn.style.background = ''; // Reset button color
+
         player1NameInput.value = '';
         player2NameInput.value = '';
         pokemonSearchInput.value = '';
@@ -1823,6 +2055,28 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Name = '';
         selectedPokemon = null;
         clearSelection();
+
+        // Reset Type Mode state
+        player1SelectedTypes = [];
+        player2SelectedTypes = [];
+        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+
+        // Restore correct UI based on current mode
+        const pokemonGrid = document.getElementById('pokemon-grid');
+        const typeGrid = document.getElementById('type-selection-grid');
+        const searchContainer = document.querySelector('.pokemon-search-container');
+        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input, .type-filters-wrapper');
+
+        if (currentMode === 'type') {
+            pokemonGrid.classList.add('hidden');
+            typeGrid.classList.remove('hidden');
+            filterElements.forEach(el => el.style.display = 'none');
+        } else {
+            pokemonGrid.classList.remove('hidden');
+            typeGrid.classList.add('hidden');
+            filterElements.forEach(el => el.style.display = '');
+        }
+
         updateInstruction();
     }
 });

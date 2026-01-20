@@ -24,19 +24,20 @@
             <div id="selection-screen" class="screen active">
                 <div class="name-inputs">
                     <div class="name-input-group" id="player1-name-group">
-                        <label for="player1-name">Player 1</label>
-                        <input type="text" id="player1-name" placeholder="なまえ" maxlength="10">
+                        <label for="player1-name">トレーナー 1</label>
+                        <input type="text" id="player1-name" placeholder="ネーム" maxlength="10">
                     </div>
                     <div class="name-input-group hidden" id="player2-name-group">
-                        <label for="player2-name">Player 2</label>
-                        <input type="text" id="player2-name" placeholder="なまえ" maxlength="10">
+                        <label for="player2-name">トレーナー 2</label>
+                        <input type="text" id="player2-name" placeholder="ネーム" maxlength="10">
                     </div>
                 </div>
                 <div class="pokemon-search-container">
-                    <div class="omakase-toggle-wrapper">
-                        <input type="checkbox" id="omakase-mode-toggle">
-                        <label for="omakase-mode-toggle">おまかせモード</label>
-                    </div>
+                    <select id="mode-select">
+                        <option value="full">フルモード</option>
+                        <option value="omakase">おまかせモード</option>
+                        <option value="type">タイプモード</option>
+                    </select>
                     <select id="region-filter">
                         <option value="all">すべてのちほう</option>
                         <option value="gen1">カントー (1-151)</option>
@@ -51,11 +52,77 @@
                         <option value="gen9">パルデア (906-)</option>
                         <option value="hisui">ヒスイ</option>
                     </select>
+                    <div class="type-filters-wrapper">
+                        <select id="type1-filter">
+                            <option value="all">タイプ1</option>
+                            <option value="normal">ノーマル</option>
+                            <option value="fire">ほのお</option>
+                            <option value="water">みず</option>
+                            <option value="electric">でんき</option>
+                            <option value="grass">くさ</option>
+                            <option value="ice">こおり</option>
+                            <option value="fighting">かくとう</option>
+                            <option value="poison">どく</option>
+                            <option value="ground">じめん</option>
+                            <option value="flying">ひこう</option>
+                            <option value="psychic">エスパー</option>
+                            <option value="bug">むし</option>
+                            <option value="rock">いわ</option>
+                            <option value="ghost">ゴースト</option>
+                            <option value="dragon">ドラゴン</option>
+                            <option value="dark">あく</option>
+                            <option value="steel">はがね</option>
+                            <option value="fairy">フェアリー</option>
+                        </select>
+                        <select id="type2-filter">
+                            <option value="all">タイプ2</option>
+                            <option value="none">なし</option>
+                            <option value="normal">ノーマル</option>
+                            <option value="fire">ほのお</option>
+                            <option value="water">みず</option>
+                            <option value="electric">でんき</option>
+                            <option value="grass">くさ</option>
+                            <option value="ice">こおり</option>
+                            <option value="fighting">かくとう</option>
+                            <option value="poison">どく</option>
+                            <option value="ground">じめん</option>
+                            <option value="flying">ひこう</option>
+                            <option value="psychic">エスパー</option>
+                            <option value="bug">むし</option>
+                            <option value="rock">いわ</option>
+                            <option value="ghost">ゴースト</option>
+                            <option value="dragon">ドラゴン</option>
+                            <option value="dark">あく</option>
+                            <option value="steel">はがね</option>
+                            <option value="fairy">フェアリー</option>
+                        </select>
+                    </div>
                     <input type="text" id="pokemon-search" placeholder="ポケモンを けんさく" autocomplete="off">
                     <div id="search-suggestions" class="search-suggestions hidden"></div>
                 </div>
                 <div class="pokemon-grid" id="pokemon-grid">
                     <!-- Javascript will populate this -->
+                </div>
+                <div class="type-selection-grid hidden" id="type-selection-grid">
+                    <button type="button" class="type-btn" data-type="normal">ノーマル</button>
+                    <button type="button" class="type-btn" data-type="fire">ほのお</button>
+                    <button type="button" class="type-btn" data-type="water">みず</button>
+                    <button type="button" class="type-btn" data-type="electric">でんき</button>
+                    <button type="button" class="type-btn" data-type="grass">くさ</button>
+                    <button type="button" class="type-btn" data-type="ice">こおり</button>
+                    <button type="button" class="type-btn" data-type="fighting">かくとう</button>
+                    <button type="button" class="type-btn" data-type="poison">どく</button>
+                    <button type="button" class="type-btn" data-type="ground">じめん</button>
+                    <button type="button" class="type-btn" data-type="flying">ひこう</button>
+                    <button type="button" class="type-btn" data-type="psychic">エスパー</button>
+                    <button type="button" class="type-btn" data-type="bug">むし</button>
+                    <button type="button" class="type-btn" data-type="rock">いわ</button>
+                    <button type="button" class="type-btn" data-type="ghost">ゴースト</button>
+                    <button type="button" class="type-btn" data-type="dragon">ドラゴン</button>
+                    <button type="button" class="type-btn" data-type="dark">あく</button>
+                    <button type="button" class="type-btn" data-type="steel">はがね</button>
+                    <button type="button" class="type-btn" data-type="fairy">フェアリー</button>
+                    <button type="button" class="type-confirm-btn" id="type-confirm-btn">けってい</button>
                 </div>
             </div>
 
