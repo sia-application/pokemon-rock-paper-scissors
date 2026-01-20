@@ -1188,3 +1188,20 @@ body.omakase-active .card-close-btn {
 #view-result-btn.hidden {
     display: none !important;
 }
+
+/* Effectiveness Process Styling */
+.multiplier-process {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    padding: 5px 10px;
+    text-align: left;
+    display: inline-block;
+    min-width: 150px;
+}
+
+.multiplier-process div {
+    margin: 2px 0;
+}

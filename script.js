@@ -1562,6 +1562,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             toggleFilters(true); // Disable filters/rules for Player 2
 
+            // Change header color for Player 2
+            document.querySelector('.game-header').classList.add('player2-turn');
+
+            // Change confirm button color for Player 2
+            const confirmBtn = document.getElementById('type-confirm-btn');
+            if (confirmBtn) {
+                confirmBtn.style.background = 'var(--secondary-color)';
+            }
+
             updateInstruction();
         } else if (player1Pokemon && player2SelectedTypes.length > 0) {
             // Confirm player 2 selection and start battle
@@ -1590,6 +1599,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTypeBattle(p1, p2) {
+        clearBattleResult();
         selectionScreen.classList.remove('active');
         selectionScreen.classList.add('hidden');
         battleScreen.classList.remove('hidden');
@@ -1774,7 +1784,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCardToPokemon(cardElement, pokemon) {
         cardElement.classList.remove('random-card');
-        cardElement.innerHTML = getPokemonCardInnerHtml(pokemon);
+        cardElement.innerHTML = getPokemonCardInnerHtml(pokemon, false); // Disable lazy loading for active selection
 
         // Add close button listener
         const closeBtn = cardElement.querySelector('.card-close-btn');
@@ -1803,7 +1813,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function getPokemonCardInnerHtml(pokemon) {
+    function getPokemonCardInnerHtml(pokemon, lazyLoad = true) { // lazyLoad arg kept for interface compatibility but ignored
         let displayId = pokemon.id;
         if (displayId >= 10000) {
             displayId -= 10000;
@@ -1816,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `
             <div class="card-close-btn">×</div>
             <span class="pokemon-number">No.${String(displayId).padStart(3, '0')}</span>
-            <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
+            <img src="${pokemon.image}" alt="${pokemon.name}">
             <h3>${pokemon.name}</h3>
             <div class="type-badges">${typeBadges}</div>
         `;
@@ -1890,7 +1900,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'pokemon-card';
         card.dataset.pokemonId = pokemon.id;
-        card.innerHTML = getPokemonCardInnerHtml(pokemon);
+        card.innerHTML = getPokemonCardInnerHtml(pokemon, true); // Keep lazy loading for grid
         card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
 
         // Add close button listener
@@ -2023,6 +2033,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame(player1, player2) {
+        clearBattleResult();
         // Update labels with player names
         player1Label.textContent = player1Name;
         player2Label.textContent = player2Name;
@@ -2061,6 +2072,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFighterCard(element, pokemon) {
+        element.classList.add('fighter-card');
         element.innerHTML = `<img src="${pokemon.image}" alt="${pokemon.name}">`;
         element.style.borderColor = `var(--type-${pokemon.types[0]})`;
     }
@@ -2070,7 +2082,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const viewResultBtn = document.getElementById('view-result-btn');
         if (viewResultBtn) viewResultBtn.style.display = 'none';
 
-        const { result, p1Multiplier, p2Multiplier } = calculateEffectiveness(p1.types, p2.types);
+        const { result, p1Multiplier, p2Multiplier, p1Process, p2Process } = calculateEffectiveness(p1.types, p2.types);
 
         // Update instruction
         instructionText.textContent = 'しょうぶ あり！';
@@ -2112,36 +2124,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('player1-types').textContent = currentMode === 'type' ? '' : p1TypesStr;
         document.getElementById('player1-multiplier').textContent = `×${p1Multiplier}`;
+        document.getElementById('player1-process').innerHTML = p1Process.map(step => `<div>${step}</div>`).join('');
+
         document.getElementById('player2-types').textContent = currentMode === 'type' ? '' : p2TypesStr;
         document.getElementById('player2-multiplier').textContent = `×${p2Multiplier}`;
+        document.getElementById('player2-process').innerHTML = p2Process.map(step => `<div>${step}</div>`).join('');
 
         resultDisplay.classList.remove('hidden');
+    }
+
+    function clearBattleResult() {
+        resultMessage.textContent = '';
+        document.getElementById('player1-multiplier').textContent = '';
+        document.getElementById('player1-process').innerHTML = '';
+        document.getElementById('player1-types').textContent = '';
+        document.getElementById('player2-multiplier').textContent = '';
+        document.getElementById('player2-process').innerHTML = '';
+        document.getElementById('player2-types').textContent = '';
     }
 
     function calculateEffectiveness(attackerTypes, defenderTypes) {
         // Calculate total multiplier for attacker vs defender
         let attackerMultiplier = 1;
+        const attackerProcess = [];
         for (const atkType of attackerTypes) {
-            const relationships = typeChart[atkType];
-            if (relationships) {
-                for (const defType of defenderTypes) {
-                    if (relationships[defType] !== undefined) {
-                        attackerMultiplier *= relationships[defType];
-                    }
-                }
+            const relationships = typeChart[atkType] || {};
+            for (const defType of defenderTypes) {
+                const mult = relationships[defType] !== undefined ? relationships[defType] : 1;
+                attackerMultiplier *= mult;
+                attackerProcess.push(`${translateType(atkType)} → ${translateType(defType)} (×${mult})`);
             }
         }
 
         // Calculate total multiplier for defender vs attacker
         let defenderMultiplier = 1;
+        const defenderProcess = [];
         for (const defType of defenderTypes) {
-            const relationships = typeChart[defType];
-            if (relationships) {
-                for (const atkType of attackerTypes) {
-                    if (relationships[atkType] !== undefined) {
-                        defenderMultiplier *= relationships[atkType];
-                    }
-                }
+            const relationships = typeChart[defType] || {};
+            for (const atkType of attackerTypes) {
+                const mult = relationships[atkType] !== undefined ? relationships[atkType] : 1;
+                defenderMultiplier *= mult;
+                defenderProcess.push(`${translateType(defType)} → ${translateType(atkType)} (×${mult})`);
             }
         }
 
@@ -2158,12 +2181,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return {
             result,
             p1Multiplier: attackerMultiplier,
-            p2Multiplier: defenderMultiplier
+            p2Multiplier: defenderMultiplier,
+            p1Process: attackerProcess,
+            p2Process: defenderProcess
         };
     }
 
     function resetGame() {
         if (actionTimeout) clearTimeout(actionTimeout);
+        clearBattleResult();
         battleScreen.classList.remove('active');
         battleScreen.classList.add('hidden');
 
@@ -2212,6 +2238,12 @@ document.addEventListener('DOMContentLoaded', () => {
         player1SelectedTypes = [];
         player2SelectedTypes = [];
         document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+
+        // Reset confirm button color
+        const confirmBtn = document.getElementById('type-confirm-btn');
+        if (confirmBtn) {
+            confirmBtn.style.background = '';
+        }
 
         // Restore correct UI based on current mode
         const pokemonGrid = document.getElementById('pokemon-grid');
