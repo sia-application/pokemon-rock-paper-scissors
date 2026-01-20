@@ -1799,13 +1799,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getPokemonCardInnerHtml(pokemon) {
+        let displayId = pokemon.id;
+        if (displayId >= 10000) {
+            displayId -= 10000;
+        }
+
         const typeBadges = pokemon.types.map(type =>
             `<span class="type-badge bg-${type}">${translateType(type)}</span>`
         ).join('');
 
         return `
             <div class="card-close-btn">×</div>
-            <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
+            <span class="pokemon-number">No.${String(displayId).padStart(3, '0')}</span>
             <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
             <h3>${pokemon.name}</h3>
             <div class="type-badges">${typeBadges}</div>
