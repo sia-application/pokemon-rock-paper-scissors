@@ -1510,10 +1510,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.querySelectorAll('.type-btn').forEach(btn => {
                 const type = btn.dataset.type;
-                if (player1SelectedTypes.includes(type)) {
-                    // Keep P1 selection selected
-                    btn.classList.add('selected');
-                } else if (player2SelectedTypes.includes(type)) {
+                if (player2SelectedTypes.includes(type)) {
                     // Select new random P2 types
                     btn.classList.add('selected');
                 } else {
@@ -1554,9 +1551,12 @@ document.addEventListener('DOMContentLoaded', () => {
             player2NameGroup.classList.remove('hidden');
 
             // Reset type button states for player 2: Clear ALL selections so P2 doesn't see P1's choice
+            // Reset type button states for player 2: Clear ALL selections so P2 doesn't see P1's choice
             document.querySelectorAll('.type-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
+
+            toggleFilters(true); // Disable filters/rules for Player 2
 
             updateInstruction();
         } else if (player1Pokemon && player2SelectedTypes.length > 0) {
@@ -1941,6 +1941,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('.game-header').classList.add('player2-turn');
 
                 updateInstruction();
+                toggleFilters(true); // Disable filters for Player 2 selection
             }
         } else {
             // Player 2's turn
@@ -2187,6 +2188,18 @@ document.addEventListener('DOMContentLoaded', () => {
             filterElements.forEach(el => el.style.display = '');
         }
 
+        // Ensure filters are enabled on reset
+        toggleFilters(false);
         updateInstruction();
     }
+
+    function toggleFilters(disabled) {
+        const ids = ['mode-select', 'region-filter', 'type1-filter', 'type2-filter', 'battle-rule-toggle', 'constraint-toggle'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = disabled;
+        });
+    }
+
+    updateInstruction();
 });
