@@ -1263,6 +1263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const player2Label = document.getElementById('player2-label');
     const pokemonSearchInput = document.getElementById('pokemon-search');
     const searchSuggestions = document.getElementById('search-suggestions');
+    const modeSelect = document.getElementById('mode-select');
 
     // -- Game State --
     let player1Pokemon = null;
@@ -1560,7 +1561,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.remove('selected');
             });
 
-            toggleFilters(true); // Disable filters/rules for Player 2
+            if (modeSelect.value !== 'full') {
+                toggleFilters(true); // Disable filters/rules for Player 2 if NOT in full mode
+            } else {
+                document.getElementById('mode-select').disabled = true; // Disable only mode select in full mode
+            }
 
             // Change header color for Player 2
             document.querySelector('.game-header').classList.add('player2-turn');
@@ -1973,7 +1978,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('.game-header').classList.add('player2-turn');
 
                 updateInstruction();
-                toggleFilters(true); // Disable filters for Player 2 selection
+                if (modeSelect.value !== 'full') {
+                    toggleFilters(true); // Disable filters for Player 2 selection if NOT in full mode
+                } else {
+                    document.getElementById('mode-select').disabled = true; // Disable only mode select in full mode
+                }
             }
         } else {
             // Player 2's turn
