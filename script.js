@@ -1306,6 +1306,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('region-filter').addEventListener('change', handleRegionChange);
+        document.getElementById('cancel-selection-btn').addEventListener('click', () => {
+            // Only clear tentative selection, not full game reset unless intended
+            // For now, clear current selection.
+            clearSelection();
+            selectedPokemon = null;
+            updateInstruction();
+            // Important: If resetting "Random Card" selection, reset its content too 
+            const randomCard = document.getElementById('random-card');
+            if (randomCard && !randomCard.classList.contains('random-card')) {
+                resetRandomCard(randomCard);
+            }
+        });
 
         updateInstruction();
     }
@@ -1319,11 +1331,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (region === 'all') {
             currentPokemonList = pokemonData;
+        } else if (region === 'gen7') {
+            // Include Alolan forms
+            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ'));
+        } else if (region === 'gen8') {
+            // Include Galarian forms
+            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル'));
+        } else if (region === 'gen9') {
+            // Include Paldean forms
+            currentPokemonList = pokemonData.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア'));
         } else if (region === 'hisui') {
             // Custom filtering for Hisui
             currentPokemonList = pokemonData.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
         } else {
-            currentPokemonList = pokemonData.filter(p => p.id >= range.min && p.id <= range.max);
+            // Standard generations: Exclude regional forms that might share IDs or be in range
+            currentPokemonList = pokemonData.filter(p =>
+                p.id >= range.min &&
+                p.id <= range.max &&
+                !p.name.includes('アローラ') &&
+                !p.name.includes('ガラル') &&
+                !p.name.includes('パルデア') &&
+                !p.name.includes('ヒスイ')
+            );
         }
 
         renderPokemonGrid(currentPokemonList);
@@ -1407,6 +1436,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCardToPokemon(cardElement, pokemon) {
         cardElement.classList.remove('random-card');
         cardElement.innerHTML = getPokemonCardInnerHtml(pokemon);
+
+        // Add close button listener
+        const closeBtn = cardElement.querySelector('.card-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearSelection();
+            });
+        }
     }
 
     function resetRandomCard(cardElement) {
@@ -1427,6 +1465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
 
         return `
+            <div class="card-close-btn">×</div>
             <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
             <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
             <h3>${pokemon.name}</h3>
@@ -1504,6 +1543,16 @@ document.addEventListener('DOMContentLoaded', () => {
         card.dataset.pokemonId = pokemon.id;
         card.innerHTML = getPokemonCardInnerHtml(pokemon);
         card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
+
+        // Add close button listener
+        const closeBtn = card.querySelector('.card-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearSelection();
+            });
+        }
+
         return card;
     }
 
@@ -1516,6 +1565,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (randomCard && !randomCard.classList.contains('random-card')) {
             resetRandomCard(randomCard);
         }
+
+        // Reset state
+        selectedPokemon = null;
+        updateInstruction();
     }
 
     function handlePokemonSelect(pokemon, cardElement) {
@@ -1538,6 +1591,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 instructionText.textContent = 'もういちど クリックで けってい！';
+
+                // Show cancel button
+                const cancelBtn = document.getElementById('cancel-selection-btn');
+                if (cancelBtn) {
+                    cancelBtn.classList.remove('hidden');
+                }
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm selection
@@ -1569,6 +1629,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 instructionText.textContent = 'もういちど クリックで けってい！';
+
+                // Show cancel button
+                const cancelBtn = document.getElementById('cancel-selection-btn');
+                if (cancelBtn) {
+                    cancelBtn.classList.remove('hidden');
+                }
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm and start battle
