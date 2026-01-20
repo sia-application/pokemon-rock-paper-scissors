@@ -1269,6 +1269,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Name = '';
     let player2Name = '';
     let selectedPokemon = null;
+    let loadedCount = 0;
+    const BATCH_SIZE = 50;
+    let observer = null;
 
     // -- Init --
     initGame();
@@ -1372,6 +1375,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderPokemonGrid() {
         pokemonGrid.innerHTML = '';
+        loadedCount = 0;
 
         // Add random card first
         const randomCard = document.createElement('div');
@@ -1383,23 +1387,68 @@ document.addEventListener('DOMContentLoaded', () => {
         randomCard.addEventListener('click', handleRandomSelect);
         pokemonGrid.appendChild(randomCard);
 
-        // Add pokemon cards
-        pokemonData.forEach(pokemon => {
-            const card = document.createElement('div');
-            card.className = 'pokemon-card';
-            card.dataset.pokemonId = pokemon.id;
-            const typeBadges = pokemon.types.map(type =>
-                `<span class="type-badge bg-${type}">${translateType(type)}</span>`
-            ).join('');
-            card.innerHTML = `
-                <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
-                <img src="${pokemon.image}" alt="${pokemon.name}">
-                <h3>${pokemon.name}</h3>
-                <div class="type-badges">${typeBadges}</div>
-            `;
-            card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
+        setupObserver();
+        loadNextBatch();
+    }
+
+    function setupObserver() {
+        if (observer) {
+            observer.disconnect();
+        }
+
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    loadNextBatch();
+                }
+            });
+        }, { rootMargin: '200px' });
+    }
+
+    function loadNextBatch() {
+        const nextBatch = pokemonData.slice(loadedCount, loadedCount + BATCH_SIZE);
+
+        // Remove sentinel if it exists
+        const sentinel = document.getElementById('grid-sentinel');
+        if (sentinel) {
+            observer.unobserve(sentinel);
+            sentinel.remove();
+        }
+
+        nextBatch.forEach(pokemon => {
+            const card = createPokemonCard(pokemon);
             pokemonGrid.appendChild(card);
         });
+
+        loadedCount += nextBatch.length;
+
+        // Add sentinel if there are more items
+        if (loadedCount < pokemonData.length) {
+            const newSentinel = document.createElement('div');
+            newSentinel.id = 'grid-sentinel';
+            newSentinel.style.gridColumn = '1 / -1';
+            newSentinel.style.height = '20px';
+            pokemonGrid.appendChild(newSentinel);
+            observer.observe(newSentinel);
+        }
+    }
+
+    function createPokemonCard(pokemon) {
+        const card = document.createElement('div');
+        card.className = 'pokemon-card';
+        card.dataset.pokemonId = pokemon.id;
+        const typeBadges = pokemon.types.map(type =>
+            `<span class="type-badge bg-${type}">${translateType(type)}</span>`
+        ).join('');
+
+        card.innerHTML = `
+            <span class="pokemon-number">No.${String(pokemon.id).padStart(3, '0')}</span>
+            <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
+            <h3>${pokemon.name}</h3>
+            <div class="type-badges">${typeBadges}</div>
+        `;
+        card.addEventListener('click', () => handlePokemonSelect(pokemon, card));
+        return card;
     }
 
     function clearSelection() {
