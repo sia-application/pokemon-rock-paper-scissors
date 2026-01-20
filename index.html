@@ -95,7 +95,7 @@
                         <option value="steel">はがね</option>
                         <option value="fairy">フェアリー</option>
                     </select>
-                    <input type="text" id="pokemon-search" placeholder="ポケモンを けんさく" autocomplete="off">
+                    <input type="text" id="pokemon-search" placeholder="ポケモンをけんさく" autocomplete="off">
                     <div id="search-suggestions" class="search-suggestions hidden"></div>
                 </div>
                 <div class="pokemon-grid" id="pokemon-grid">
@@ -109,6 +109,14 @@
                             <span class="slider round"></span>
                         </label>
                         <label class="rule-label" for="battle-rule-toggle">2タイプ戦</label>
+                    </div>
+                    <div class="type-rule-selector" id="constraint-selector">
+                        <label class="rule-label" for="constraint-toggle">2タイプ任意</label>
+                        <label class="switch">
+                            <input type="checkbox" id="constraint-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <label class="rule-label" for="constraint-toggle">2タイプ必須</label>
                     </div>
                     <button type="button" class="type-btn" data-type="normal">ノーマル</button>
                     <button type="button" class="type-btn" data-type="fire">ほのお</button>
@@ -129,7 +137,7 @@
                     <button type="button" class="type-btn" data-type="steel">はがね</button>
                     <button type="button" class="type-btn" data-type="fairy">フェアリー</button>
                     <div class="type-random-buttons">
-                        <button type="button" class="type-random-btn" id="random-type-btn">🎲 おまかせ</button>
+                        <button type="button" class="type-random-btn" id="random-type-btn">おまかせ</button>
                     </div>
                     <button type="button" class="type-confirm-btn" id="type-confirm-btn">けってい</button>
                 </div>
@@ -140,7 +148,7 @@
             <div id="battle-screen" class="screen hidden">
                 <div class="battle-arena">
                     <div class="fighter player">
-                        <p class="player-name" id="player1-label">Player 1</p>
+                        <p class="player-name" id="player1-label">トレーナー 1</p>
                         <div class="fighter-card" id="player-fighter"></div>
                         <p class="pokemon-name" id="player1-pokemon-name"></p>
                         <p class="pokemon-types" id="player1-types"></p>
@@ -148,7 +156,7 @@
                     </div>
                     <div class="vs-badge">VS</div>
                     <div class="fighter cpu">
-                        <p class="player-name" id="player2-label">Player 2</p>
+                        <p class="player-name" id="player2-label">トレーナー 2</p>
                         <div class="fighter-card" id="cpu-fighter"></div>
                         <p class="pokemon-name" id="player2-pokemon-name"></p>
                         <p class="pokemon-types" id="player2-types"></p>

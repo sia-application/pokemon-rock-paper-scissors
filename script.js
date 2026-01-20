@@ -1281,6 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let typeBattleMode = 'double'; // 'single' or 'double'
     let player1SelectedTypes = []; // For Type Mode
     let player2SelectedTypes = []; // For Type Mode
+    let isDoubleTypeRequired = false; // Toggle state
     let actionTimeout = null;
 
     const GENERATION_RANGES = {
@@ -1333,7 +1334,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
 
         // Battle Rule Change (Toggle)
+        // Battle Rule Change (Toggle)
         document.getElementById('battle-rule-toggle').addEventListener('change', handleBattleRuleChange);
+        document.getElementById('constraint-toggle').addEventListener('change', (e) => isDoubleTypeRequired = e.target.checked);
 
         document.getElementById('cancel-selection-btn').addEventListener('click', () => {
             // ... existing code ...
@@ -1400,6 +1403,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Checked = Double (2 types), Unchecked = Single (1 type)
         typeBattleMode = e.target.checked ? 'double' : 'single';
 
+        // Show/Hide Constraint Toggle with flex display
+        const constraintSelector = document.getElementById('constraint-selector');
+        if (typeBattleMode === 'double') {
+            constraintSelector.classList.remove('hidden');
+            constraintSelector.style.display = 'flex'; // Ensure flex display is restored
+        } else {
+            constraintSelector.classList.add('hidden');
+            constraintSelector.style.display = 'none'; // Force hide
+        }
+
         // Reset selections on rules change
         player1SelectedTypes = [];
         player2SelectedTypes = [];
@@ -1456,7 +1469,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleRandomTypeClick() {
         // In double mode, randomly choose 1 or 2. In single mode, always 1.
-        const count = typeBattleMode === 'double' ? (Math.random() < 0.5 ? 1 : 2) : 1;
+        let count = 1;
+        if (typeBattleMode === 'double') {
+            if (isDoubleTypeRequired) {
+                count = 2; // Always 2 if required
+            } else {
+                count = (Math.random() < 0.5 ? 1 : 2);
+            }
+        }
         const types = [
             'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
             'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark',
@@ -1507,6 +1527,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function confirmTypeSelection() {
+        // Check requirement
+        const isPlayer1Turn = !player1Pokemon;
+        const currentSelection = isPlayer1Turn ? player1SelectedTypes : player2SelectedTypes;
+
+        if (typeBattleMode === 'double' && isDoubleTypeRequired && currentSelection.length < 2) {
+            alert('2つのタイプを選択してください！');
+            return;
+        }
         if (currentMode !== 'type') return;
 
         if (!player1Pokemon && player1SelectedTypes.length > 0) {
@@ -1900,7 +1928,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm selection
-                player1Name = player1NameInput.value.trim() || 'Player 1';
+                player1Name = player1NameInput.value.trim() || 'トレーナー 1';
                 player1Pokemon = pokemon;
                 selectedPokemon = null;
                 clearSelection();
@@ -1941,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm and start battle
-                player2Name = player2NameInput.value.trim() || 'Player 2';
+                player2Name = player2NameInput.value.trim() || 'トレーナー 2';
                 startGame(player1Pokemon, pokemon);
             }
         }
