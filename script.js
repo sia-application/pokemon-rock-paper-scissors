@@ -122,6 +122,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Opponent wants to play again
                 handleRematch();
                 break;
+            case 'show_result':
+                // Opponent clicked show result button
+                handleShowResult();
+                break;
+        }
+    }
+
+    // Handle show result from opponent
+    function handleShowResult() {
+        const viewResultBtn = document.getElementById('view-result-btn');
+        if (viewResultBtn) {
+            viewResultBtn.style.display = 'none';
+            viewResultBtn.onclick = null;
+        }
+        // Resolve battle with current pokemon
+        if (isHost && myPokemonSelected && opponentPokemonSelected) {
+            resolveBattle(myPokemonSelected, opponentPokemonSelected);
+        } else if (!isHost && myPokemonSelected && opponentPokemonSelected) {
+            resolveBattle(opponentPokemonSelected, myPokemonSelected);
         }
     }
 
@@ -2547,6 +2566,10 @@ document.addEventListener('DOMContentLoaded', () => {
         viewResultBtn.style.display = 'inline-block';
         viewResultBtn.onclick = () => {
             viewResultBtn.style.display = 'none';
+            // Send show_result signal to opponent in online mode
+            if (isOnlineMode && conn) {
+                conn.send({ type: 'show_result' });
+            }
             resolveBattle(player1, player2);
             viewResultBtn.onclick = null;
         };
