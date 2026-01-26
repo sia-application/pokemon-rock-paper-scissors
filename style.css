@@ -511,15 +511,37 @@ input:checked+.slider:before {
     min-height: 200px;
 }
 
+@media (max-width: 500px) {
+    .type-fighter-card {
+        padding: 15px;
+        min-height: 120px;
+    }
+}
+
 .type-fighter-types {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 20px 0;
+    justify-content: center;
 }
 
 .type-fighter-types .type-badge {
     font-size: 1.1rem;
     padding: 10px 20px;
+    white-space: nowrap;
+}
+
+@media (max-width: 500px) {
+    .type-fighter-types {
+        gap: 5px;
+        margin: 10px 0;
+    }
+
+    .type-fighter-types .type-badge {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
 }
 
 /* Random type buttons */
@@ -936,6 +958,14 @@ body.omakase-active .card-close-btn {
     min-height: 200px;
 }
 
+@media (max-width: 500px) {
+    .battle-arena {
+        margin-bottom: 15px;
+        min-height: 150px;
+        gap: 5px;
+    }
+}
+
 .fighter {
     flex: 1;
     display: flex;
@@ -950,6 +980,13 @@ body.omakase-active .card-close-btn {
     margin: 0 10px;
 }
 
+@media (max-width: 500px) {
+    .vs-badge {
+        font-size: 1.2rem;
+        margin: 0 5px;
+    }
+}
+
 .fighter-card {
     width: 120px;
     height: 120px;
@@ -961,6 +998,15 @@ body.omakase-active .card-close-btn {
     margin-bottom: 10px;
     border: 4px solid #ddd;
     overflow: hidden;
+}
+
+@media (max-width: 500px) {
+    .fighter-card {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+        margin-bottom: 5px;
+    }
 }
 
 .fighter-card img {
