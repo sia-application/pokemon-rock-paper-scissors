@@ -286,16 +286,28 @@ main {
     padding: 15px;
 }
 
-.type-rule-selector {
+.type-rules-container {
     grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .type-rules-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.type-rule-selector {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 8px;
     background: #f9f9f9;
-    padding: 12px 20px;
-    border-radius: 20px;
+    padding: 10px 15px;
+    border-radius: 15px;
     border: 2px solid #eee;
 }
 
@@ -309,7 +321,7 @@ main {
 .rule-label {
     font-weight: bold;
     color: #bbb;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     user-select: none;
     text-align: left;
@@ -318,7 +330,7 @@ main {
 
 .rule-label.active {
     color: #444;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 /* Toggle Switch Styles */
@@ -329,6 +341,10 @@ main {
     height: 28px;
     flex-shrink: 0;
     /* Prevent the switch from being squeezed */
+    transform: rotate(90deg);
+    /* Rotate clockwise: Checked (On) moves to the BOTTOM */
+    margin: 15px 0;
+    /* Add margin to account for vertical rotation footprint */
 }
 
 .switch input {
@@ -606,7 +622,8 @@ input:checked+.slider:before {
 }
 
 /* Fully disabled grid (for online selection done) */
-.pokemon-grid.fully-disabled {
+.pokemon-grid.fully-disabled,
+.type-selection-grid.fully-disabled {
     pointer-events: none;
     opacity: 0.6;
     filter: grayscale(0.5);

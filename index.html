@@ -158,25 +158,27 @@
                     <!-- Javascript will populate this -->
                 </div>
                 <div class="type-selection-grid hidden" id="type-selection-grid">
-                    <div class="type-rule-selector">
-                        <div class="rule-labels">
-                            <label class="rule-label" id="label-rule-single">1タイプ</label>
-                            <label class="rule-label" id="label-rule-double">2タイプ</label>
+                    <div class="type-rules-container">
+                        <div class="type-rule-selector">
+                            <div class="rule-labels">
+                                <label class="rule-label" id="label-rule-single">1タイプ</label>
+                                <label class="rule-label" id="label-rule-double">2タイプ</label>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="battle-rule-toggle" checked>
+                                <span class="slider round"></span>
+                            </label>
                         </div>
-                        <label class="switch">
-                            <input type="checkbox" id="battle-rule-toggle" checked>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div class="type-rule-selector" id="constraint-selector">
-                        <div class="rule-labels">
-                            <label class="rule-label" id="label-constraint-free">1タイプだけでもいいよ</label>
-                            <label class="rule-label" id="label-constraint-required">2タイプせんたくしてね</label>
+                        <div class="type-rule-selector" id="constraint-selector">
+                            <div class="rule-labels">
+                                <label class="rule-label" id="label-constraint-free">1タイプだけでもいいよ</label>
+                                <label class="rule-label" id="label-constraint-required">2タイプせんたくしてね</label>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="constraint-toggle">
+                                <span class="slider round"></span>
+                            </label>
                         </div>
-                        <label class="switch">
-                            <input type="checkbox" id="constraint-toggle">
-                            <span class="slider round"></span>
-                        </label>
                     </div>
                     <button type="button" class="type-btn" data-type="normal">ノーマル</button>
                     <button type="button" class="type-btn" data-type="fire">ほのお</button>

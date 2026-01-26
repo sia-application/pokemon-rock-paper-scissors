@@ -114,6 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isHost) {
                         const modeSelect = document.getElementById('mode-select');
                         if (modeSelect) modeSelect.disabled = true;
+
+                        // Also disable type mode toggles if guest selects first
+                        const battleRuleToggle = document.getElementById('battle-rule-toggle');
+                        const constraintToggle = document.getElementById('constraint-toggle');
+                        if (battleRuleToggle) battleRuleToggle.disabled = true;
+                        if (constraintToggle) constraintToggle.disabled = true;
                     }
                 }
                 checkBothPlayersReady();
@@ -414,6 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modeSelect) modeSelect.disabled = false;
         if (regionFilter) regionFilter.disabled = false;
         if (type1Filter) type1Filter.disabled = false;
+        if (type2Filter) type2Filter.disabled = false;
+
         if (type2Filter) type2Filter.disabled = false;
 
         const battleRuleToggle = document.getElementById('battle-rule-toggle');
@@ -2860,6 +2868,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type1Filter) type1Filter.disabled = true;
         if (type2Filter) type2Filter.disabled = true;
 
+        // Disable type mode toggles
+        const battleRuleToggle = document.getElementById('battle-rule-toggle');
+        const constraintToggle = document.getElementById('constraint-toggle');
+        if (battleRuleToggle) battleRuleToggle.disabled = true;
+        if (constraintToggle) constraintToggle.disabled = true;
+
+        // Disable type selection grid
+        const typeGrid = document.getElementById('type-selection-grid');
+        if (typeGrid) typeGrid.classList.add('fully-disabled');
+
         // Disable random card specifically
         const randomCard = document.getElementById('random-card');
         if (randomCard) randomCard.style.pointerEvents = 'none';
@@ -2891,6 +2909,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (regionFilter) regionFilter.disabled = !isFilterAllowed;
         if (type1Filter) type1Filter.disabled = !isFilterAllowed;
         if (type2Filter) type2Filter.disabled = !isFilterAllowed;
+
+        // Re-enable type mode toggles (only if host or local)
+        if (!isOnlineMode || isHost) {
+            const battleRuleToggle = document.getElementById('battle-rule-toggle');
+            const constraintToggle = document.getElementById('constraint-toggle');
+            if (battleRuleToggle) battleRuleToggle.disabled = false;
+            if (constraintToggle) constraintToggle.disabled = false;
+        }
+
+        // Re-enable type selection grid
+        const typeGrid = document.getElementById('type-selection-grid');
+        if (typeGrid) typeGrid.classList.remove('fully-disabled');
     }
 
     function translateType(type) {
