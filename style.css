@@ -1562,3 +1562,23 @@ body.omakase-active .card-close-btn {
 .online-name-container {
     margin-bottom: 20px;
 }
+
+/* Opponent ready indicator */
+.opponent-ready-indicator {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-radius: 15px;
+    margin: 15px 0;
+    border: 2px solid #81c784;
+}
+
+.opponent-ready-indicator .ready-icon {
+    font-size: 2rem;
+}
+
+.opponent-ready-indicator p {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #2e7d32;
+}

@@ -106,6 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         player1Name = data.playerName;
                     }
                 }
+                // Show notification that opponent has selected
+                if (!myPokemonSelected) {
+                    showOpponentReadyIndicator();
+                }
                 checkBothPlayersReady();
                 break;
             case 'game_settings':
@@ -382,6 +386,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (waitingEl) {
             waitingEl.remove();
         }
+        // Also hide opponent ready indicator
+        const opponentReadyEl = document.querySelector('.opponent-ready-indicator');
+        if (opponentReadyEl) {
+            opponentReadyEl.remove();
+        }
+    }
+
+    // Show opponent ready indicator (opponent has selected)
+    function showOpponentReadyIndicator() {
+        // Remove if already exists
+        let indicatorEl = document.querySelector('.opponent-ready-indicator');
+        if (!indicatorEl) {
+            indicatorEl = document.createElement('div');
+            indicatorEl.className = 'opponent-ready-indicator';
+            indicatorEl.innerHTML = `
+                <span class="ready-icon">✅</span>
+                <p>あいてが えらびました！</p>
+            `;
+            selectionScreen.insertBefore(indicatorEl, selectionScreen.firstChild);
+        }
+        instructionText.textContent = 'あなたも えらぼう！';
     }
 
     // Send pokemon selection to peer
