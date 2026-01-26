@@ -289,22 +289,36 @@ main {
 .type-rule-selector {
     grid-column: 1 / -1;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     gap: 15px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     background: #f9f9f9;
-    padding: 12px;
+    padding: 12px 20px;
     border-radius: 20px;
     border: 2px solid #eee;
 }
 
+.rule-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
 .rule-label {
     font-weight: bold;
-    color: #555;
-    font-size: 1rem;
+    color: #bbb;
+    font-size: 0.9rem;
     cursor: pointer;
     user-select: none;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.rule-label.active {
+    color: #444;
+    font-size: 1rem;
 }
 
 /* Toggle Switch Styles */
@@ -313,6 +327,8 @@ main {
     display: inline-block;
     width: 50px;
     height: 28px;
+    flex-shrink: 0;
+    /* Prevent the switch from being squeezed */
 }
 
 .switch input {

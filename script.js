@@ -580,6 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (toggle) {
                 toggle.checked = data.constraint;
                 isDoubleTypeRequired = data.constraint;
+                updateToggleLabels('constraint-toggle');
             }
         }
     }
@@ -1985,6 +1986,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('type-confirm-btn').addEventListener('click', confirmTypeSelection);
 
+        // --- Type Mode Rules Management ---
+        const updateToggleLabels = (toggleId) => {
+            const toggle = document.getElementById(toggleId);
+            if (!toggle) return;
+            const isChecked = toggle.checked;
+
+            if (toggleId === 'battle-rule-toggle') {
+                document.getElementById('label-rule-single').classList.toggle('active', !isChecked);
+                document.getElementById('label-rule-double').classList.toggle('active', isChecked);
+            } else if (toggleId === 'constraint-toggle') {
+                document.getElementById('label-constraint-free').classList.toggle('active', !isChecked);
+                document.getElementById('label-constraint-required').classList.toggle('active', isChecked);
+            }
+        };
+
+        const setupLabelClick = (labelId, toggleId, targetValue) => {
+            const label = document.getElementById(labelId);
+            if (!label) return;
+            label.addEventListener('click', () => {
+                const toggle = document.getElementById(toggleId);
+                if (toggle && !toggle.disabled && toggle.checked !== targetValue) {
+                    toggle.checked = targetValue;
+                    toggle.dispatchEvent(new Event('change'));
+                }
+            });
+        };
+
+        // Battle Rule labels
+        setupLabelClick('label-rule-single', 'battle-rule-toggle', false);
+        setupLabelClick('label-rule-double', 'battle-rule-toggle', true);
+        // Constraint labels
+        setupLabelClick('label-constraint-free', 'constraint-toggle', false);
+        setupLabelClick('label-constraint-required', 'constraint-toggle', true);
+
+        // Initial update
+        updateToggleLabels('battle-rule-toggle');
+        updateToggleLabels('constraint-toggle');
+
+        // Expose to window for external calls if needed (like from applyBattleRuleChange)
+        window.updateToggleLabels = updateToggleLabels;
+
+
         // Unified random button
         document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
 
@@ -1993,6 +2036,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('battle-rule-toggle').addEventListener('change', handleBattleRuleChange);
         document.getElementById('constraint-toggle').addEventListener('change', (e) => {
             isDoubleTypeRequired = e.target.checked;
+            updateToggleLabels('constraint-toggle');
             // Online: Send settings to guest
             sendSettingsChange('constraint', e.target.checked);
         });
@@ -2099,6 +2143,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyBattleRuleChange(isDouble) {
         typeBattleMode = isDouble ? 'double' : 'single';
+
+        // Update label styles
+        if (window.updateToggleLabels) window.updateToggleLabels('battle-rule-toggle');
 
         // Show/Hide Constraint Toggle with flex display
         const constraintSelector = document.getElementById('constraint-selector');
