@@ -1,6 +1,409 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Pokemon Janken App Loaded');
 
+    // ===== Online Battle State =====
+    let isOnlineMode = false;
+    let isHost = false;
+    let peer = null;
+    let conn = null;
+    let roomId = null;
+    let myPokemonSelected = null;
+    let opponentPokemonSelected = null;
+    let waitingForOpponent = false;
+
+    // Online mode UI elements
+    const modeSelectionScreen = document.getElementById('mode-selection-screen');
+    const onlineRoomScreen = document.getElementById('online-room-screen');
+    const localModeBtn = document.getElementById('local-mode-btn');
+    const onlineModeBtn = document.getElementById('online-mode-btn');
+    const backToModeBtn = document.getElementById('back-to-mode-btn');
+    const createRoomBtn = document.getElementById('create-room-btn');
+    const joinRoomBtn = document.getElementById('join-room-btn');
+    const roomIdInput = document.getElementById('room-id-input');
+    const connectionStatus = document.getElementById('connection-status');
+    const statusIcon = document.getElementById('status-icon');
+    const statusText = document.getElementById('status-text');
+    const roomIdDisplay = document.getElementById('room-id-display');
+    const displayRoomId = document.getElementById('display-room-id');
+    const copyRoomIdBtn = document.getElementById('copy-room-id-btn');
+    const cancelConnectionBtn = document.getElementById('cancel-connection-btn');
+
+    // Generate random room ID (8 chars uppercase)
+    function generateRoomId() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    // Initialize PeerJS
+    function initPeer(id = null) {
+        return new Promise((resolve, reject) => {
+            const peerId = id ? `pokemon-janken-${id}` : undefined;
+            peer = new Peer(peerId, {
+                debug: 1
+            });
+
+            peer.on('open', (id) => {
+                console.log('My peer ID is:', id);
+                resolve(id);
+            });
+
+            peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                if (err.type === 'unavailable-id') {
+                    showConnectionError('このルームIDは すでにつかわれています');
+                } else if (err.type === 'peer-unavailable') {
+                    showConnectionError('ルームがみつかりません');
+                } else {
+                    showConnectionError('せつぞくエラー: ' + err.type);
+                }
+                reject(err);
+            });
+
+            peer.on('connection', (connection) => {
+                // Host receives connection
+                conn = connection;
+                setupConnectionHandlers();
+            });
+        });
+    }
+
+    // Setup connection event handlers
+    function setupConnectionHandlers() {
+        conn.on('open', () => {
+            console.log('Connection established');
+            onConnectionEstablished();
+        });
+
+        conn.on('data', (data) => {
+            handlePeerMessage(data);
+        });
+
+        conn.on('close', () => {
+            console.log('Connection closed');
+            onConnectionClosed();
+        });
+
+        conn.on('error', (err) => {
+            console.error('Connection error:', err);
+            showConnectionError('せつぞくがきれました');
+        });
+    }
+
+    // Handle incoming messages from peer
+    function handlePeerMessage(data) {
+        console.log('Received:', data);
+        switch (data.type) {
+            case 'pokemon_selected':
+                opponentPokemonSelected = data.pokemon;
+                if (data.playerName) {
+                    if (isHost) {
+                        player2Name = data.playerName;
+                    } else {
+                        player1Name = data.playerName;
+                    }
+                }
+                checkBothPlayersReady();
+                break;
+            case 'game_settings':
+                // Sync game settings from host
+                if (!isHost) {
+                    applyGameSettings(data.settings);
+                }
+                break;
+            case 'start_selection':
+                // Guest receives signal to start selection
+                showSelectionScreen();
+                break;
+        }
+    }
+
+    // Check if both players have selected
+    function checkBothPlayersReady() {
+        if (myPokemonSelected && opponentPokemonSelected) {
+            // Both players ready, start battle
+            waitingForOpponent = false;
+            hideWaitingIndicator();
+
+            if (isHost) {
+                startGame(myPokemonSelected, opponentPokemonSelected);
+            } else {
+                startGame(opponentPokemonSelected, myPokemonSelected);
+            }
+        } else if (myPokemonSelected && !opponentPokemonSelected) {
+            // Show waiting indicator
+            showWaitingIndicator();
+        }
+    }
+
+    // Create room (Host)
+    async function createRoom() {
+        roomId = generateRoomId();
+        isHost = true;
+        isOnlineMode = true;
+
+        showConnectionStatus('ルームをつくっています...');
+
+        try {
+            await initPeer(roomId);
+            showRoomCreated(roomId);
+        } catch (err) {
+            console.error('Failed to create room:', err);
+        }
+    }
+
+    // Join room (Guest)
+    async function joinRoom(targetRoomId) {
+        if (!targetRoomId || targetRoomId.length === 0) {
+            showConnectionError('ルームIDをいれてください');
+            return;
+        }
+
+        isHost = false;
+        isOnlineMode = true;
+        roomId = targetRoomId.toUpperCase();
+
+        showConnectionStatus('ルームにせつぞくちゅう...');
+
+        try {
+            await initPeer();
+            conn = peer.connect(`pokemon-janken-${roomId}`);
+            setupConnectionHandlers();
+        } catch (err) {
+            console.error('Failed to join room:', err);
+        }
+    }
+
+    // Connection established callback
+    function onConnectionEstablished() {
+        statusIcon.textContent = '✅';
+        statusIcon.classList.add('connected');
+        statusText.textContent = 'せつぞくしました！';
+        cancelConnectionBtn.classList.add('hidden');
+
+        // Short delay then go to selection screen
+        setTimeout(() => {
+            // Hide online room screen
+            onlineRoomScreen.classList.remove('active');
+            onlineRoomScreen.classList.add('hidden');
+
+            // Show selection screen
+            showSelectionScreen();
+
+            // If host, send start signal
+            if (isHost && conn) {
+                conn.send({ type: 'start_selection' });
+            }
+        }, 1000);
+    }
+
+    // Connection closed callback
+    function onConnectionClosed() {
+        if (isOnlineMode) {
+            alert('あいてとのせつぞくがきれました');
+            resetOnlineState();
+            showModeSelectionScreen();
+        }
+    }
+
+    // Show connection status
+    function showConnectionStatus(message) {
+        connectionStatus.classList.remove('hidden');
+        statusIcon.textContent = '⏳';
+        statusIcon.classList.remove('connected');
+        statusText.textContent = message;
+        cancelConnectionBtn.classList.remove('hidden');
+    }
+
+    // Show room created with ID
+    function showRoomCreated(id) {
+        statusIcon.textContent = '📡';
+        statusText.textContent = 'ともだちをまっています...';
+        roomIdDisplay.classList.remove('hidden');
+        displayRoomId.textContent = id;
+    }
+
+    // Show connection error
+    function showConnectionError(message) {
+        statusIcon.textContent = '❌';
+        statusIcon.classList.remove('connected');
+        statusText.textContent = message;
+        cancelConnectionBtn.classList.remove('hidden');
+        roomIdDisplay.classList.add('hidden');
+    }
+
+    // Show selection screen
+    function showSelectionScreen() {
+        selectionScreen.classList.remove('hidden');
+        selectionScreen.classList.add('active');
+
+        // Setup for online mode
+        if (isOnlineMode) {
+            instructionText.textContent = 'ポケモンを えらぼう！';
+            player1NameGroup.classList.remove('hidden');
+            player2NameGroup.classList.add('hidden');
+        }
+    }
+
+    // Show mode selection screen
+    function showModeSelectionScreen() {
+        modeSelectionScreen.classList.remove('hidden');
+        modeSelectionScreen.classList.add('active');
+        onlineRoomScreen.classList.remove('active');
+        onlineRoomScreen.classList.add('hidden');
+        selectionScreen.classList.remove('active');
+        selectionScreen.classList.add('hidden');
+    }
+
+    // Cancel connection
+    function cancelConnection() {
+        if (peer) {
+            peer.destroy();
+            peer = null;
+        }
+        if (conn) {
+            conn.close();
+            conn = null;
+        }
+        resetOnlineState();
+        connectionStatus.classList.add('hidden');
+        roomIdDisplay.classList.add('hidden');
+    }
+
+    // Reset online state
+    function resetOnlineState() {
+        isOnlineMode = false;
+        isHost = false;
+        roomId = null;
+        myPokemonSelected = null;
+        opponentPokemonSelected = null;
+        waitingForOpponent = false;
+        if (peer) {
+            peer.destroy();
+            peer = null;
+        }
+        conn = null;
+    }
+
+    // Show waiting for opponent indicator
+    function showWaitingIndicator() {
+        waitingForOpponent = true;
+        instructionText.textContent = 'あいての せんたくを まっています...';
+
+        // Add waiting indicator if not exists
+        let waitingEl = document.querySelector('.waiting-indicator');
+        if (!waitingEl) {
+            waitingEl = document.createElement('div');
+            waitingEl.className = 'waiting-indicator';
+            waitingEl.innerHTML = `
+                <span class="waiting-icon">⏳</span>
+                <p>あいてを まっています...</p>
+            `;
+            selectionScreen.insertBefore(waitingEl, selectionScreen.firstChild);
+        }
+    }
+
+    // Hide waiting indicator
+    function hideWaitingIndicator() {
+        waitingForOpponent = false;
+        const waitingEl = document.querySelector('.waiting-indicator');
+        if (waitingEl) {
+            waitingEl.remove();
+        }
+    }
+
+    // Send pokemon selection to peer
+    function sendPokemonSelection(pokemon) {
+        if (conn && isOnlineMode) {
+            const myName = player1NameInput.value.trim() || (isHost ? 'トレーナー 1' : 'トレーナー 2');
+            conn.send({
+                type: 'pokemon_selected',
+                pokemon: {
+                    id: pokemon.id,
+                    name: pokemon.name,
+                    types: pokemon.types,
+                    image: pokemon.image
+                },
+                playerName: myName
+            });
+        }
+    }
+
+    // Apply game settings from host
+    function applyGameSettings(settings) {
+        if (settings.mode) {
+            document.getElementById('mode-select').value = settings.mode;
+        }
+        if (settings.region) {
+            document.getElementById('region-filter').value = settings.region;
+        }
+    }
+
+    // --- Online Mode Event Listeners ---
+    if (localModeBtn) {
+        localModeBtn.addEventListener('click', () => {
+            isOnlineMode = false;
+            modeSelectionScreen.classList.remove('active');
+            modeSelectionScreen.classList.add('hidden');
+            selectionScreen.classList.remove('hidden');
+            selectionScreen.classList.add('active');
+        });
+    }
+
+    if (onlineModeBtn) {
+        onlineModeBtn.addEventListener('click', () => {
+            modeSelectionScreen.classList.remove('active');
+            modeSelectionScreen.classList.add('hidden');
+            onlineRoomScreen.classList.remove('hidden');
+            onlineRoomScreen.classList.add('active');
+        });
+    }
+
+    if (backToModeBtn) {
+        backToModeBtn.addEventListener('click', () => {
+            cancelConnection();
+            onlineRoomScreen.classList.remove('active');
+            onlineRoomScreen.classList.add('hidden');
+            modeSelectionScreen.classList.remove('hidden');
+            modeSelectionScreen.classList.add('active');
+        });
+    }
+
+    if (createRoomBtn) {
+        createRoomBtn.addEventListener('click', createRoom);
+    }
+
+    if (joinRoomBtn) {
+        joinRoomBtn.addEventListener('click', () => {
+            joinRoom(roomIdInput.value.trim());
+        });
+    }
+
+    if (copyRoomIdBtn) {
+        copyRoomIdBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(roomId).then(() => {
+                copyRoomIdBtn.textContent = 'コピーしました！';
+                setTimeout(() => {
+                    copyRoomIdBtn.textContent = 'コピー';
+                }, 2000);
+            });
+        });
+    }
+
+    if (cancelConnectionBtn) {
+        cancelConnectionBtn.addEventListener('click', cancelConnection);
+    }
+
+    // Room ID input: auto uppercase
+    if (roomIdInput) {
+        roomIdInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+
     // -- Data --
     const pokemonData = [
         // Generation 1
@@ -1970,7 +2373,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedPokemon = null;
                 clearSelection();
 
-                // Switch to Player 2's name input
+                // Online mode: send selection and wait for opponent
+                if (isOnlineMode) {
+                    myPokemonSelected = pokemon;
+                    sendPokemonSelection(pokemon);
+                    checkBothPlayersReady();
+                    return;
+                }
+
+                // Local mode: Switch to Player 2's name input
                 player1NameGroup.classList.add('hidden');
                 player2NameGroup.classList.remove('hidden');
 
@@ -2212,6 +2623,34 @@ document.addEventListener('DOMContentLoaded', () => {
         clearBattleResult();
         battleScreen.classList.remove('active');
         battleScreen.classList.add('hidden');
+
+        // Online mode: reset state and go back to mode selection
+        if (isOnlineMode) {
+            resetOnlineState();
+            hideWaitingIndicator();
+            showModeSelectionScreen();
+
+            // Reset name inputs
+            player1NameInput.value = '';
+            player2NameInput.value = '';
+            player1Pokemon = null;
+            player1Name = '';
+            player2Name = '';
+            selectedPokemon = null;
+
+            // Reset View Result Button
+            const viewResultBtn = document.getElementById('view-result-btn');
+            if (viewResultBtn) {
+                viewResultBtn.style.display = 'none';
+                viewResultBtn.onclick = null;
+            }
+
+            // Reset header color
+            document.querySelector('.game-header').classList.remove('player2-turn');
+            document.querySelector('.game-header').classList.remove('draw-result');
+            restartBtn.style.background = '';
+            return;
+        }
 
         selectionScreen.classList.remove('hidden');
         selectionScreen.classList.add('active');

@@ -1205,3 +1205,360 @@ body.omakase-active .card-close-btn {
 .multiplier-process div {
     margin: 2px 0;
 }
+
+/* ===== Online Mode Styles ===== */
+
+/* Mode Selection Screen */
+.mode-selection-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.mode-selection-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: var(--text-color);
+}
+
+.mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+@media (min-width: 500px) {
+    .mode-buttons {
+        flex-direction: row;
+    }
+}
+
+.mode-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 25px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-main);
+}
+
+.mode-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.mode-btn:active {
+    transform: translateY(-2px);
+}
+
+.local-btn {
+    background: linear-gradient(135deg, var(--primary-color), #e53935);
+    color: white;
+}
+
+.online-btn {
+    background: linear-gradient(135deg, #42A5F5, #1E88E5);
+    color: white;
+}
+
+.mode-icon {
+    font-size: 2.5rem;
+}
+
+.mode-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.mode-desc {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Online Room Screen */
+.online-room-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.online-room-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    color: var(--text-color);
+}
+
+.back-btn {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.room-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+@media (min-width: 500px) {
+    .room-actions {
+        flex-direction: row;
+    }
+}
+
+.room-action-card {
+    flex: 1;
+    background: #f9f9f9;
+    border-radius: 20px;
+    padding: 25px 20px;
+    border: 2px solid #eee;
+    transition: all 0.2s;
+}
+
+.room-action-card:hover {
+    border-color: #ddd;
+}
+
+.room-action-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.room-action-card p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.room-action-card input {
+    width: 100%;
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 12px;
+    border: 3px solid #ddd;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.room-action-card input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+}
+
+.action-btn {
+    width: 100%;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.create-btn {
+    background: linear-gradient(135deg, var(--primary-color), #e53935);
+    color: white;
+    box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+}
+
+.create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+}
+
+.join-btn {
+    background: linear-gradient(135deg, #42A5F5, #1E88E5);
+    color: white;
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+}
+
+.join-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+}
+
+/* Connection Status */
+.connection-status {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 20px;
+    border: 2px solid #eee;
+}
+
+.connection-status.hidden {
+    display: none;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.status-icon {
+    font-size: 1.5rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-icon.connected {
+    animation: none;
+}
+
+#status-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.room-id-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.room-id-display.hidden {
+    display: none;
+}
+
+.room-id-display p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.room-id-code {
+    font-size: 2rem;
+    font-weight: bold;
+    font-family: monospace;
+    letter-spacing: 4px;
+    background: white;
+    padding: 15px 25px;
+    border-radius: 15px;
+    border: 3px dashed #ddd;
+    color: var(--text-color);
+}
+
+.copy-btn {
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    background: white;
+    color: var(--primary-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.cancel-btn {
+    margin-top: 15px;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    padding: 10px 25px;
+    border: 2px solid #999;
+    border-radius: 20px;
+    background: white;
+    color: #666;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    border-color: #666;
+    color: #333;
+}
+
+.cancel-btn.hidden {
+    display: none;
+}
+
+/* Waiting for opponent indicator */
+.waiting-indicator {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border-radius: 15px;
+    margin: 15px 0;
+    border: 2px solid #ffcc80;
+}
+
+.waiting-indicator .waiting-icon {
+    font-size: 2rem;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.waiting-indicator p {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #e65100;
+}
+
+/* Online mode name input styling */
+.online-name-container {
+    margin-bottom: 20px;
+}
