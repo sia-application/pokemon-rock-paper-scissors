@@ -2966,11 +2966,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('player1-types').textContent = currentMode === 'type' ? '' : p1TypesStr;
         document.getElementById('player1-multiplier').textContent = `×${p1Multiplier}`;
-        document.getElementById('player1-process').innerHTML = p1Process.map(step => `<div>${step}</div>`).join('');
+        const p1ProcessEl = document.getElementById('player1-process');
+        p1ProcessEl.innerHTML = p1Process.map(step => `<div>${step}</div>`).join('');
+        p1ProcessEl.classList.add('active');
 
         document.getElementById('player2-types').textContent = currentMode === 'type' ? '' : p2TypesStr;
         document.getElementById('player2-multiplier').textContent = `×${p2Multiplier}`;
-        document.getElementById('player2-process').innerHTML = p2Process.map(step => `<div>${step}</div>`).join('');
+
+        const p2ProcessEl = document.getElementById('player2-process');
+        p2ProcessEl.innerHTML = p2Process.map(step => `<div>${step}</div>`).join('');
+        p2ProcessEl.classList.add('active');
 
         resultDisplay.classList.remove('hidden');
     }
@@ -2978,10 +2983,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearBattleResult() {
         resultMessage.textContent = '';
         document.getElementById('player1-multiplier').textContent = '';
-        document.getElementById('player1-process').innerHTML = '';
+
+        const p1ProcessEl = document.getElementById('player1-process');
+        p1ProcessEl.innerHTML = '';
+        p1ProcessEl.classList.remove('active');
+
         document.getElementById('player1-types').textContent = '';
         document.getElementById('player2-multiplier').textContent = '';
-        document.getElementById('player2-process').innerHTML = '';
+
+        const p2ProcessEl = document.getElementById('player2-process');
+        p2ProcessEl.innerHTML = '';
+        p2ProcessEl.classList.remove('active');
+
         document.getElementById('player2-types').textContent = '';
     }
 

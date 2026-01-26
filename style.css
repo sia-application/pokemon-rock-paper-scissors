@@ -1251,8 +1251,13 @@ body.omakase-active .card-close-btn {
     border-radius: 8px;
     padding: 5px 10px;
     text-align: left;
-    display: inline-block;
+    display: none;
+    /* Hide by default */
     min-width: 150px;
+}
+
+.multiplier-process.active {
+    display: inline-block;
 }
 
 .multiplier-process div {
