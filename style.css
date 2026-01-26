@@ -1002,7 +1002,9 @@ body.omakase-active .card-close-btn {
     .battle-arena {
         margin-bottom: 15px;
         min-height: 150px;
-        gap: 5px;
+        gap: 10px;
+        justify-content: center;
+        /* Centering instead of space-between */
     }
 }
 
@@ -1295,6 +1297,17 @@ body.omakase-active .card-close-btn {
 
 .multiplier-process div {
     margin: 2px 0;
+}
+
+@media (max-width: 500px) {
+    .multiplier-process {
+        min-width: unset;
+        width: 100%;
+        max-width: 135px;
+        /* Limit width to fit narrow screens */
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
 }
 
 /* ===== Online Mode Styles ===== */
