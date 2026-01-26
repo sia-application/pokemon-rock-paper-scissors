@@ -226,9 +226,17 @@ document.addEventListener('DOMContentLoaded', () => {
             hideWaitingIndicator();
 
             if (isHost) {
-                startGame(myPokemonSelected, opponentPokemonSelected);
+                if (myPokemonSelected.isTypeOnly) {
+                    startTypeBattle(myPokemonSelected, opponentPokemonSelected);
+                } else {
+                    startGame(myPokemonSelected, opponentPokemonSelected);
+                }
             } else {
-                startGame(opponentPokemonSelected, myPokemonSelected);
+                if (myPokemonSelected.isTypeOnly) {
+                    startTypeBattle(opponentPokemonSelected, myPokemonSelected);
+                } else {
+                    startGame(opponentPokemonSelected, myPokemonSelected);
+                }
             }
         } else if (myPokemonSelected && !opponentPokemonSelected) {
             // Show waiting indicator
@@ -388,6 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (regionFilter) regionFilter.disabled = !allowFilters;
         if (type1Filter) type1Filter.disabled = !allowFilters;
         if (type2Filter) type2Filter.disabled = !allowFilters;
+
+        // Disable type mode toggles for guest
+        const battleRuleToggle = document.getElementById('battle-rule-toggle');
+        const constraintToggle = document.getElementById('constraint-toggle');
+        if (battleRuleToggle) battleRuleToggle.disabled = true;
+        if (constraintToggle) constraintToggle.disabled = true;
     }
 
     // Enable filters (for host or local mode)
@@ -401,6 +415,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (regionFilter) regionFilter.disabled = false;
         if (type1Filter) type1Filter.disabled = false;
         if (type2Filter) type2Filter.disabled = false;
+
+        const battleRuleToggle = document.getElementById('battle-rule-toggle');
+        const constraintToggle = document.getElementById('constraint-toggle');
+        if (battleRuleToggle) battleRuleToggle.disabled = false;
+        if (constraintToggle) constraintToggle.disabled = false;
     }
 
     // Show mode selection screen
@@ -545,6 +564,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.type2 && type2Filter) {
             type2Filter.value = data.type2;
             type2Filter.dispatchEvent(new Event('change'));
+        }
+
+        // Sync type mode rules
+        if (data.battleRule !== undefined) {
+            const toggle = document.getElementById('battle-rule-toggle');
+            if (toggle) {
+                toggle.checked = (data.battleRule === 'double');
+                // Manually trigger the logic without re-sending
+                applyBattleRuleChange(toggle.checked);
+            }
+        }
+        if (data.constraint !== undefined) {
+            const toggle = document.getElementById('constraint-toggle');
+            if (toggle) {
+                toggle.checked = data.constraint;
+                isDoubleTypeRequired = data.constraint;
+            }
         }
     }
 
@@ -1955,7 +1991,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Battle Rule Change (Toggle)
         // Battle Rule Change (Toggle)
         document.getElementById('battle-rule-toggle').addEventListener('change', handleBattleRuleChange);
-        document.getElementById('constraint-toggle').addEventListener('change', (e) => isDoubleTypeRequired = e.target.checked);
+        document.getElementById('constraint-toggle').addEventListener('change', (e) => {
+            isDoubleTypeRequired = e.target.checked;
+            // Online: Send settings to guest
+            sendSettingsChange('constraint', e.target.checked);
+        });
 
         document.getElementById('cancel-selection-btn').addEventListener('click', () => {
             // ... existing code ...
@@ -2000,6 +2040,17 @@ document.addEventListener('DOMContentLoaded', () => {
             filterElements.forEach(el => el.style.display = 'none');
             document.body.classList.remove('omakase-active');
             pokemonGrid.classList.remove('disabled');
+
+            // Online Type Mode: Show only relevant name input
+            if (isOnlineMode) {
+                if (isHost) {
+                    player1NameGroup.classList.remove('hidden');
+                    player2NameGroup.classList.add('hidden');
+                } else {
+                    player1NameGroup.classList.add('hidden');
+                    player2NameGroup.classList.remove('hidden');
+                }
+            }
         } else {
             // Full or Omakase Mode: Show pokemon grid, hide type grid
             pokemonGrid.classList.remove('hidden');
@@ -2038,7 +2089,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleBattleRuleChange(e) {
         // Checked = Double (2 types), Unchecked = Single (1 type)
-        typeBattleMode = e.target.checked ? 'double' : 'single';
+        const isDouble = e.target.checked;
+
+        // Online: Send settings to guest
+        sendSettingsChange('battleRule', isDouble ? 'double' : 'single');
+
+        applyBattleRuleChange(isDouble);
+    }
+
+    function applyBattleRuleChange(isDouble) {
+        typeBattleMode = isDouble ? 'double' : 'single';
 
         // Show/Hide Constraint Toggle with flex display
         const constraintSelector = document.getElementById('constraint-selector');
@@ -2064,7 +2124,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = btn.dataset.type;
 
         // Determine which player is selecting
-        const isPlayer1Turn = !player1Pokemon;
+        let isPlayer1Turn;
+        if (isOnlineMode) {
+            isPlayer1Turn = isHost;
+        } else {
+            isPlayer1Turn = !player1Pokemon;
+        }
+
         // Selection limit based on rule
         const limit = typeBattleMode === 'double' ? 2 : 1;
 
@@ -2131,7 +2197,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update state and UI
-        if (!player1Pokemon) {
+        const isPlayer1Choice = isOnlineMode ? isHost : !player1Pokemon;
+
+        if (isPlayer1Choice) {
             player1SelectedTypes = randomSelection;
 
             document.querySelectorAll('.type-btn').forEach(btn => {
@@ -2162,7 +2230,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function confirmTypeSelection() {
         // Check requirement
-        const isPlayer1Turn = !player1Pokemon;
+        let isPlayer1Turn;
+        if (isOnlineMode) {
+            isPlayer1Turn = isHost;
+        } else {
+            isPlayer1Turn = !player1Pokemon;
+        }
+
         const currentSelection = isPlayer1Turn ? player1SelectedTypes : player2SelectedTypes;
 
         if (typeBattleMode === 'double' && isDoubleTypeRequired && currentSelection.length < 2) {
@@ -2171,23 +2245,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (currentMode !== 'type') return;
 
-        if (!player1Pokemon && player1SelectedTypes.length > 0) {
-            // Confirm player 1 selection
-            player1Pokemon = {
+        const isPlayer1Choice = isOnlineMode ? isHost : !player1Pokemon;
+
+        if (isPlayer1Choice && player1SelectedTypes.length > 0) {
+            // Player 1 confirmed
+            const pokemon = {
                 name: getTypeDisplayName(player1SelectedTypes),
                 types: player1SelectedTypes,
                 image: null,
                 isTypeOnly: true
             };
 
-            // Get player 1 name
+            if (isOnlineMode) {
+                if (isHost) {
+                    // Host finalized Trainer 1 selection
+                    player1Pokemon = pokemon;
+                    player1Name = player1NameInput.value.trim() || 'トレーナー 1';
+                    myPokemonSelected = pokemon;
+                    sendPokemonSelection(pokemon);
+                    checkBothPlayersReady();
+                    disableSelectionUI();
+                    return;
+                } else {
+                    // Guest cannot select Trainer 1
+                    return;
+                }
+            }
+
+            // Confirm player 1 selection (Local mode)
+            player1Pokemon = pokemon;
             player1Name = player1NameInput.value.trim() || 'トレーナー 1';
 
             // Show player 2 name input
             player1NameGroup.classList.add('hidden');
             player2NameGroup.classList.remove('hidden');
 
-            // Reset type button states for player 2: Clear ALL selections so P2 doesn't see P1's choice
             // Reset type button states for player 2: Clear ALL selections so P2 doesn't see P1's choice
             document.querySelectorAll('.type-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -2196,7 +2288,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modeSelect.value !== 'full') {
                 toggleFilters(true); // Disable filters/rules for Player 2 if NOT in full mode
             } else {
-                document.getElementById('mode-select').disabled = true; // Disable only mode select in full mode
+                const modeSelectEl = document.getElementById('mode-select');
+                if (modeSelectEl) modeSelectEl.disabled = true; // Disable only mode select in full mode
             }
 
             // Change header color for Player 2
@@ -2209,18 +2302,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             updateInstruction();
-        } else if (player1Pokemon && player2SelectedTypes.length > 0) {
-            // Confirm player 2 selection and start battle
-            const player2Pokemon = {
+        } else if (!isPlayer1Choice && player2SelectedTypes.length > 0) {
+            // Player 2 confirmed
+            const pokemon = {
                 name: getTypeDisplayName(player2SelectedTypes),
                 types: player2SelectedTypes,
                 image: null,
                 isTypeOnly: true
             };
 
-            player2Name = player2NameInput.value.trim() || 'トレーナー 2';
+            if (isOnlineMode) {
+                if (!isHost) {
+                    // Guest finalized Trainer 2 selection
+                    player2Name = player2NameInput.value.trim() || 'トレーナー 2';
+                    myPokemonSelected = pokemon;
+                    sendPokemonSelection(pokemon);
+                    checkBothPlayersReady();
+                    disableSelectionUI();
+                    return;
+                } else {
+                    // Host cannot select Trainer 2 sequentially in online mode
+                    return;
+                }
+            }
 
-            startTypeBattle(player1Pokemon, player2Pokemon);
+            // Confirm player 2 selection and start battle (Local mode)
+            player2Name = player2NameInput.value.trim() || 'トレーナー 2';
+            startTypeBattle(player1Pokemon, pokemon);
         }
     }
 
@@ -2260,6 +2368,10 @@ document.addEventListener('DOMContentLoaded', () => {
         viewResultBtn.style.display = 'inline-block';
         viewResultBtn.onclick = () => {
             viewResultBtn.style.display = 'none';
+            // Send show_result signal to opponent in online mode
+            if (isOnlineMode && conn) {
+                conn.send({ type: 'show_result' });
+            }
             resolveBattle(p1, p2);
             viewResultBtn.onclick = null;
         };
