@@ -110,6 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show notification that opponent has selected
                 if (!myPokemonSelected) {
                     showOpponentReadyIndicator();
+                    // If host, disable mode select when guest selects first
+                    if (isHost) {
+                        const modeSelect = document.getElementById('mode-select');
+                        if (modeSelect) modeSelect.disabled = true;
+                    }
                 }
                 checkBothPlayersReady();
                 break;
@@ -376,9 +381,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const type2Filter = document.getElementById('type2-filter');
 
         if (modeSelect) modeSelect.disabled = true;
-        if (regionFilter) regionFilter.disabled = true;
-        if (type1Filter) type1Filter.disabled = true;
-        if (type2Filter) type2Filter.disabled = true;
+
+        // Mode 'full' or 'omakase' allow filters even for guest
+        const allowFilters = (currentMode === 'full' || currentMode === 'omakase');
+
+        if (regionFilter) regionFilter.disabled = !allowFilters;
+        if (type1Filter) type1Filter.disabled = !allowFilters;
+        if (type2Filter) type2Filter.disabled = !allowFilters;
     }
 
     // Enable filters (for host or local mode)
@@ -2003,22 +2012,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 pokemonSearchInput.disabled = true;
                 pokemonSearchInput.placeholder = 'おまかせモードはけんさくできません';
 
-                // Disable region/type filters in Omakase mode
-                document.getElementById('region-filter').disabled = true;
-                document.getElementById('type1-filter').disabled = true;
-                document.getElementById('type2-filter').disabled = true;
+                // Allow region/type filters in Omakase mode for everyone
+                document.getElementById('region-filter').disabled = false;
+                document.getElementById('type1-filter').disabled = false;
+                document.getElementById('type2-filter').disabled = false;
             } else {
                 document.body.classList.remove('omakase-active');
                 pokemonGrid.classList.remove('disabled');
                 pokemonSearchInput.disabled = false;
                 pokemonSearchInput.placeholder = 'ポケモン名でけんさく';
 
-                // Enable region/type filters (if not guest in online mode)
-                if (!isOnlineMode || isHost) {
-                    document.getElementById('region-filter').disabled = false;
-                    document.getElementById('type1-filter').disabled = false;
-                    document.getElementById('type2-filter').disabled = false;
-                }
+                // Enable region/type filters for everyone in Full mode
+                document.getElementById('region-filter').disabled = false;
+                document.getElementById('type1-filter').disabled = false;
+                document.getElementById('type2-filter').disabled = false;
             }
         }
         updateInstruction();
@@ -2713,15 +2720,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isOnlineMode || isHost) {
             const modeSelect = document.getElementById('mode-select');
             if (modeSelect) modeSelect.disabled = false;
-
-            const regionFilter = document.getElementById('region-filter');
-            const type1Filter = document.getElementById('type1-filter');
-            const type2Filter = document.getElementById('type2-filter');
-
-            if (regionFilter) regionFilter.disabled = false;
-            if (type1Filter) type1Filter.disabled = false;
-            if (type2Filter) type2Filter.disabled = false;
         }
+
+        // Enable region/type filters based on mode and role
+        const regionFilter = document.getElementById('region-filter');
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        const isFilterAllowed = (!isOnlineMode || isHost || currentMode === 'full' || currentMode === 'omakase');
+
+        if (regionFilter) regionFilter.disabled = !isFilterAllowed;
+        if (type1Filter) type1Filter.disabled = !isFilterAllowed;
+        if (type2Filter) type2Filter.disabled = !isFilterAllowed;
     }
 
     function translateType(type) {
