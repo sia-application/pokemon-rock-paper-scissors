@@ -589,6 +589,13 @@ input:checked+.slider:before {
     box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
 }
 
+/* Fully disabled grid (for online selection done) */
+.pokemon-grid.fully-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+    filter: grayscale(0.5);
+}
+
 /* Omakase Mode: Hide Cancel Button */
 body.omakase-active .card-close-btn {
     display: none !important;

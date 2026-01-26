@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let myPokemonSelected = null;
     let opponentPokemonSelected = null;
     let waitingForOpponent = false;
+    let lastCreatedRoomId = null; // To prevent joining own room
 
     // Online mode UI elements
     const modeSelectionScreen = document.getElementById('mode-selection-screen');
@@ -206,6 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.game-header').classList.add('player2-turn');
         }
 
+        // Re-enable selection UI
+        enableSelectionUI();
+
         instructionText.textContent = 'つぎの ポケモンを えらぼう！';
     }
 
@@ -230,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create room (Host)
     async function createRoom() {
         roomId = generateRoomId();
+        lastCreatedRoomId = roomId; // Store for self-connect check
         isHost = true;
         isOnlineMode = true;
 
@@ -247,6 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function joinRoom(targetRoomId) {
         if (!targetRoomId || targetRoomId.length === 0) {
             showConnectionError('ルームIDをいれてください');
+            return;
+        }
+
+        // Prevent joining own room (same browser/same person)
+        if (targetRoomId.toUpperCase() === lastCreatedRoomId) {
+            showConnectionError('じぶんでつくった ルームには はいれません');
             return;
         }
 
@@ -291,9 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connection closed callback
     function onConnectionClosed() {
         if (isOnlineMode) {
-            alert('あいてとのせつぞくがきれました');
-            resetOnlineState();
-            showModeSelectionScreen();
+            alert('あいてとのせつぞくがきれました。タイトルにもどります。');
+            window.location.reload();
         }
     }
 
@@ -2600,6 +2610,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     myPokemonSelected = pokemon;
                     sendPokemonSelection(pokemon);
                     checkBothPlayersReady();
+                    disableSelectionUI();
                     return;
                 }
 
@@ -2646,6 +2657,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 instructionText.textContent = 'もういちど クリックで けってい！';
 
+                // Disable selection UI after confirming selection
+
+
+
                 // Show cancel button
                 const cancelBtn = document.getElementById('cancel-selection-btn');
                 if (cancelBtn) {
@@ -2658,6 +2673,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 player2Name = player2NameInput.value.trim() || 'トレーナー 2';
                 startGame(player1Pokemon, pokemon);
             }
+        }
+    }
+
+    // Disable selection UI after confirming selection
+    function disableSelectionUI() {
+        // Disable pokemon grid completely
+        document.getElementById('pokemon-grid').classList.add('fully-disabled');
+
+        // Disable mode select (even for host)
+        const modeSelect = document.getElementById('mode-select');
+        if (modeSelect) modeSelect.disabled = true;
+
+        // Disable filters
+        const regionFilter = document.getElementById('region-filter');
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        if (regionFilter) regionFilter.disabled = true;
+        if (type1Filter) type1Filter.disabled = true;
+        if (type2Filter) type2Filter.disabled = true;
+
+        // Disable random card specifically
+        const randomCard = document.getElementById('random-card');
+        if (randomCard) randomCard.style.pointerEvents = 'none';
+
+        // Update instruction
+        instructionText.textContent = 'あいての せんたくを まっています...';
+    }
+
+    // Enable selection UI (for reset/rematch)
+    function enableSelectionUI() {
+        document.getElementById('pokemon-grid').classList.remove('fully-disabled');
+
+        const randomCard = document.getElementById('random-card');
+        if (randomCard) randomCard.style.pointerEvents = '';
+
+        // Enable mode select if host or local
+        if (!isOnlineMode || isHost) {
+            const modeSelect = document.getElementById('mode-select');
+            if (modeSelect) modeSelect.disabled = false;
+
+            const regionFilter = document.getElementById('region-filter');
+            const type1Filter = document.getElementById('type1-filter');
+            const type2Filter = document.getElementById('type2-filter');
+
+            if (regionFilter) regionFilter.disabled = false;
+            if (type1Filter) type1Filter.disabled = false;
+            if (type2Filter) type2Filter.disabled = false;
         }
     }
 
@@ -2900,9 +2963,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Guest is Trainer 2
                 player1NameGroup.classList.add('hidden');
+                player1NameGroup.classList.add('hidden');
                 player2NameGroup.classList.remove('hidden');
                 document.querySelector('.game-header').classList.add('player2-turn');
             }
+
+            // Re-enable selection UI
+            enableSelectionUI();
 
             instructionText.textContent = 'つぎの ポケモンを えらぼう！';
             return;
