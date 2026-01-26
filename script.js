@@ -130,6 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Opponent clicked show result button
                 handleShowResult();
                 break;
+            case 'settings_change':
+                // Host changed settings, apply to guest
+                if (!isHost) {
+                    applySettingsChange(data);
+                }
+                break;
         }
     }
 
@@ -156,8 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
         waitingForOpponent = false;
         hideWaitingIndicator();
         player1Pokemon = null;
-        player1Name = '';
-        player2Name = '';
+        // Do not reset player names on rematch
+        // player1Name = '';
+        // player2Name = '';
         selectedPokemon = null;
 
         // Hide battle screen
@@ -188,8 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show selection screen
         selectionScreen.classList.remove('hidden');
         selectionScreen.classList.add('active');
-        player1NameGroup.classList.remove('hidden');
-        player2NameGroup.classList.add('hidden');
+
+        if (isHost) {
+            player1NameGroup.classList.remove('hidden');
+            player2NameGroup.classList.add('hidden');
+        } else {
+            // Guest is Trainer 2
+            player1NameGroup.classList.add('hidden');
+            player2NameGroup.classList.remove('hidden');
+            document.querySelector('.game-header').classList.add('player2-turn');
+        }
 
         instructionText.textContent = 'つぎの ポケモンを えらぼう！';
     }
@@ -316,9 +331,57 @@ document.addEventListener('DOMContentLoaded', () => {
         // Setup for online mode
         if (isOnlineMode) {
             instructionText.textContent = 'ポケモンを えらぼう！';
-            player1NameGroup.classList.remove('hidden');
-            player2NameGroup.classList.add('hidden');
+
+            if (isHost) {
+                // Host is Trainer 1
+                player1NameGroup.classList.remove('hidden');
+                player2NameGroup.classList.add('hidden');
+                // Ensure header is default color (Trainer 1)
+                document.querySelector('.game-header').classList.remove('player2-turn');
+            } else {
+                // Guest is Trainer 2
+                player1NameGroup.classList.add('hidden');
+                player2NameGroup.classList.remove('hidden');
+
+                // Change header color for Player 2
+                document.querySelector('.game-header').classList.add('player2-turn');
+
+                // Change confirm button color for Player 2
+                const confirmBtn = document.getElementById('type-confirm-btn');
+                if (confirmBtn) {
+                    confirmBtn.style.background = 'var(--secondary-color)';
+                }
+
+                // Guest (not host) cannot change mode/filters - disable them
+                disableFiltersForGuest();
+            }
         }
+    }
+
+    // Disable filters for guest in online mode
+    function disableFiltersForGuest() {
+        const modeSelect = document.getElementById('mode-select');
+        const regionFilter = document.getElementById('region-filter');
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        if (modeSelect) modeSelect.disabled = true;
+        if (regionFilter) regionFilter.disabled = true;
+        if (type1Filter) type1Filter.disabled = true;
+        if (type2Filter) type2Filter.disabled = true;
+    }
+
+    // Enable filters (for host or local mode)
+    function enableFilters() {
+        const modeSelect = document.getElementById('mode-select');
+        const regionFilter = document.getElementById('region-filter');
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        if (modeSelect) modeSelect.disabled = false;
+        if (regionFilter) regionFilter.disabled = false;
+        if (type1Filter) type1Filter.disabled = false;
+        if (type2Filter) type2Filter.disabled = false;
     }
 
     // Show mode selection screen
@@ -433,6 +496,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (settings.region) {
             document.getElementById('region-filter').value = settings.region;
+        }
+    }
+
+    // Apply settings change from host (real-time sync)
+    function applySettingsChange(data) {
+        const modeSelect = document.getElementById('mode-select');
+        const regionFilter = document.getElementById('region-filter');
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        if (data.mode && modeSelect) {
+            modeSelect.value = data.mode;
+            // Trigger change event to update UI
+            modeSelect.dispatchEvent(new Event('change'));
+        }
+        if (data.region && regionFilter) {
+            regionFilter.value = data.region;
+            regionFilter.dispatchEvent(new Event('change'));
+        }
+        if (data.type1 && type1Filter) {
+            type1Filter.value = data.type1;
+            type1Filter.dispatchEvent(new Event('change'));
+        }
+        if (data.type2 && type2Filter) {
+            type2Filter.value = data.type2;
+            type2Filter.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Send settings change to guest (called by host)
+    function sendSettingsChange(settingType, value) {
+        if (isOnlineMode && isHost && conn) {
+            const data = { type: 'settings_change' };
+            data[settingType] = value;
+            conn.send(data);
         }
     }
 
@@ -1855,6 +1953,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleModeChange(e) {
         const mode = e.target.value;
+
+        // Online: Send settings to guest
+        sendSettingsChange('mode', mode);
+
         currentMode = mode;
         isOmakaseMode = (mode === 'omakase');
         const pokemonGrid = document.getElementById('pokemon-grid');
@@ -1886,11 +1988,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 pokemonGrid.classList.add('disabled');
                 pokemonSearchInput.disabled = true;
                 pokemonSearchInput.placeholder = 'おまかせモードはけんさくできません';
+
+                // Disable region/type filters in Omakase mode
+                document.getElementById('region-filter').disabled = true;
+                document.getElementById('type1-filter').disabled = true;
+                document.getElementById('type2-filter').disabled = true;
             } else {
                 document.body.classList.remove('omakase-active');
                 pokemonGrid.classList.remove('disabled');
                 pokemonSearchInput.disabled = false;
                 pokemonSearchInput.placeholder = 'ポケモン名でけんさく';
+
+                // Enable region/type filters (if not guest in online mode)
+                if (!isOnlineMode || isHost) {
+                    document.getElementById('region-filter').disabled = false;
+                    document.getElementById('type1-filter').disabled = false;
+                    document.getElementById('type2-filter').disabled = false;
+                }
             }
         }
         updateInstruction();
@@ -2145,12 +2259,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleType1Change(e) {
+        // Online: Send settings to guest
+        sendSettingsChange('type1', e.target.value);
+
         currentType1Filter = e.target.value;
         pokemonSearchInput.value = '';
         applyAllFilters();
     }
 
     function handleType2Change(e) {
+        // Online: Send settings to guest
+        sendSettingsChange('type2', e.target.value);
+
         currentType2Filter = e.target.value;
         pokemonSearchInput.value = '';
         applyAllFilters();
@@ -2734,8 +2854,9 @@ document.addEventListener('DOMContentLoaded', () => {
             hideWaitingIndicator();
 
             player1Pokemon = null;
-            player1Name = '';
-            player2Name = '';
+            // Do not reset player names on rematch
+            // player1Name = '';
+            // player2Name = '';
             selectedPokemon = null;
 
             // Hide result display
@@ -2754,16 +2875,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 viewResultBtn.onclick = null;
             }
 
-            // Reset header color
-            document.querySelector('.game-header').classList.remove('player2-turn');
+            // Reset header color (only if host, guest stays blue)
+            if (isHost) {
+                document.querySelector('.game-header').classList.remove('player2-turn');
+            }
             document.querySelector('.game-header').classList.remove('draw-result');
             restartBtn.style.background = '';
 
             // Show selection screen (keep connection)
             selectionScreen.classList.remove('hidden');
             selectionScreen.classList.add('active');
-            player1NameGroup.classList.remove('hidden');
-            player2NameGroup.classList.add('hidden');
+
+            if (isHost) {
+                player1NameGroup.classList.remove('hidden');
+                player2NameGroup.classList.add('hidden');
+            } else {
+                // Guest is Trainer 2
+                player1NameGroup.classList.add('hidden');
+                player2NameGroup.classList.remove('hidden');
+                document.querySelector('.game-header').classList.add('player2-turn');
+            }
 
             instructionText.textContent = 'つぎの ポケモンを えらぼう！';
             return;
