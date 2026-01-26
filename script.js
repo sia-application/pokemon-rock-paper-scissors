@@ -118,7 +118,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Guest receives signal to start selection
                 showSelectionScreen();
                 break;
+            case 'rematch':
+                // Opponent wants to play again
+                handleRematch();
+                break;
         }
+    }
+
+    // Handle rematch request from opponent
+    function handleRematch() {
+        // Reset game state
+        myPokemonSelected = null;
+        opponentPokemonSelected = null;
+        waitingForOpponent = false;
+        hideWaitingIndicator();
+        player1Pokemon = null;
+        player1Name = '';
+        player2Name = '';
+        selectedPokemon = null;
+
+        // Hide battle screen
+        battleScreen.classList.remove('active');
+        battleScreen.classList.add('hidden');
+
+        // Hide result display
+        resultDisplay.classList.add('hidden');
+
+        // Clear fighter displays
+        playerFighterEl.innerHTML = '';
+        cpuFighterEl.innerHTML = '';
+        playerFighterEl.style.borderColor = '#ddd';
+        cpuFighterEl.style.borderColor = '#ddd';
+
+        // Reset View Result Button
+        const viewResultBtn = document.getElementById('view-result-btn');
+        if (viewResultBtn) {
+            viewResultBtn.style.display = 'none';
+            viewResultBtn.onclick = null;
+        }
+
+        // Reset header color
+        document.querySelector('.game-header').classList.remove('player2-turn');
+        document.querySelector('.game-header').classList.remove('draw-result');
+        restartBtn.style.background = '';
+
+        // Show selection screen
+        selectionScreen.classList.remove('hidden');
+        selectionScreen.classList.add('active');
+        player1NameGroup.classList.remove('hidden');
+        player2NameGroup.classList.add('hidden');
+
+        instructionText.textContent = 'つぎの ポケモンを えらぼう！';
     }
 
     // Check if both players have selected
@@ -2624,19 +2674,30 @@ document.addEventListener('DOMContentLoaded', () => {
         battleScreen.classList.remove('active');
         battleScreen.classList.add('hidden');
 
-        // Online mode: reset state and go back to mode selection
-        if (isOnlineMode) {
-            resetOnlineState();
-            hideWaitingIndicator();
-            showModeSelectionScreen();
+        // Online mode: keep connection, go back to selection screen for rematch
+        if (isOnlineMode && conn) {
+            // Send rematch signal to opponent
+            conn.send({ type: 'rematch' });
 
-            // Reset name inputs
-            player1NameInput.value = '';
-            player2NameInput.value = '';
+            // Reset game state but keep connection
+            myPokemonSelected = null;
+            opponentPokemonSelected = null;
+            waitingForOpponent = false;
+            hideWaitingIndicator();
+
             player1Pokemon = null;
             player1Name = '';
             player2Name = '';
             selectedPokemon = null;
+
+            // Hide result display
+            resultDisplay.classList.add('hidden');
+
+            // Clear fighter displays
+            playerFighterEl.innerHTML = '';
+            cpuFighterEl.innerHTML = '';
+            playerFighterEl.style.borderColor = '#ddd';
+            cpuFighterEl.style.borderColor = '#ddd';
 
             // Reset View Result Button
             const viewResultBtn = document.getElementById('view-result-btn');
@@ -2649,6 +2710,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.game-header').classList.remove('player2-turn');
             document.querySelector('.game-header').classList.remove('draw-result');
             restartBtn.style.background = '';
+
+            // Show selection screen (keep connection)
+            selectionScreen.classList.remove('hidden');
+            selectionScreen.classList.add('active');
+            player1NameGroup.classList.remove('hidden');
+            player2NameGroup.classList.add('hidden');
+
+            instructionText.textContent = 'つぎの ポケモンを えらぼう！';
             return;
         }
 
