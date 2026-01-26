@@ -475,7 +475,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Send pokemon selection to peer
     function sendPokemonSelection(pokemon) {
         if (conn && isOnlineMode) {
-            const myName = player1NameInput.value.trim() || (isHost ? 'トレーナー 1' : 'トレーナー 2');
+            // Get name from correct input based on role
+            const nameInput = isHost ? player1NameInput : player2NameInput;
+            const defaultName = isHost ? 'トレーナー 1' : 'トレーナー 2';
+            const myName = nameInput.value.trim() || defaultName;
+
             conn.send({
                 type: 'pokemon_selected',
                 pokemon: {
@@ -2582,7 +2586,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 // Second click - confirm selection
-                player1Name = player1NameInput.value.trim() || 'トレーナー 1';
+                if (isOnlineMode && !isHost) {
+                    player2Name = player2NameInput.value.trim() || 'トレーナー 2';
+                } else {
+                    player1Name = player1NameInput.value.trim() || 'トレーナー 1';
+                }
                 player1Pokemon = pokemon;
                 selectedPokemon = null;
                 clearSelection();
