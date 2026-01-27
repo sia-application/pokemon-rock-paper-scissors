@@ -1,3 +1,13 @@
+// --- Global Toggle Function ---
+window.toggleSearchSettings = function () {
+    const container = document.getElementById('search-settings-container');
+    const btn = document.getElementById('toggle-search-btn');
+    if (!container || !btn) return;
+
+    container.classList.toggle('collapsed');
+    btn.classList.toggle('collapsed');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Pokemon Janken App Loaded');
 

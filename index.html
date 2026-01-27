@@ -83,82 +83,90 @@
             </div>
             <!-- Pokemon Selection Grid -->
             <div id="selection-screen" class="screen hidden">
-                <div class="name-inputs">
-                    <div class="name-input-group" id="player1-name-group">
-                        <label for="player1-name">トレーナー 1</label>
-                        <input type="text" id="player1-name" placeholder="おなまえ" maxlength="10">
-                    </div>
-                    <div class="name-input-group hidden" id="player2-name-group">
-                        <label for="player2-name">トレーナー 2</label>
-                        <input type="text" id="player2-name" placeholder="おなまえ" maxlength="10">
-                    </div>
+                <div class="search-toggle-header">
+                    <button id="toggle-search-btn" class="toggle-search-btn" onclick="toggleSearchSettings()">
+                        <span>おなまえ・けんさく</span>
+                        <span id="toggle-icon">▼</span>
+                    </button>
                 </div>
-                <div class="pokemon-search-container">
-                    <select id="mode-select">
-                        <option value="full">フルモード</option>
-                        <option value="omakase">おまかせモード</option>
-                        <option value="type">タイプモード</option>
-                    </select>
-                    <select id="region-filter">
-                        <option value="all">すべてのちほう</option>
-                        <option value="gen1">カントー (1-151)</option>
-                        <option value="gen2">ジョウト (152-251)</option>
-                        <option value="gen3">ホウエン (252-386)</option>
-                        <option value="gen4">シンオウ (387-493)</option>
-                        <option value="gen5">イッシュ (494-649)</option>
-                        <option value="gen6">カロス (650-721)</option>
-                        <option value="gen6_za">カロス地方(ZA)</option>
-                        <option value="gen7">アローラ (722-807)</option>
-                        <option value="unknown">不明 (808-809)</option>
-                        <option value="gen8">ガラル (810-905)</option>
-                        <option value="gen9">パルデア (906-)</option>
-                        <option value="hisui">ヒスイ</option>
-                    </select>
-                    <select id="type1-filter">
-                        <option value="all">タイプ1</option>
-                        <option value="normal">ノーマル</option>
-                        <option value="fire">ほのお</option>
-                        <option value="water">みず</option>
-                        <option value="electric">でんき</option>
-                        <option value="grass">くさ</option>
-                        <option value="ice">こおり</option>
-                        <option value="fighting">かくとう</option>
-                        <option value="poison">どく</option>
-                        <option value="ground">じめん</option>
-                        <option value="flying">ひこう</option>
-                        <option value="psychic">エスパー</option>
-                        <option value="bug">むし</option>
-                        <option value="rock">いわ</option>
-                        <option value="ghost">ゴースト</option>
-                        <option value="dragon">ドラゴン</option>
-                        <option value="dark">あく</option>
-                        <option value="steel">はがね</option>
-                        <option value="fairy">フェアリー</option>
-                    </select>
-                    <select id="type2-filter">
-                        <option value="all">タイプ2</option>
-                        <option value="none">なし</option>
-                        <option value="normal">ノーマル</option>
-                        <option value="fire">ほのお</option>
-                        <option value="water">みず</option>
-                        <option value="electric">でんき</option>
-                        <option value="grass">くさ</option>
-                        <option value="ice">こおり</option>
-                        <option value="fighting">かくとう</option>
-                        <option value="poison">どく</option>
-                        <option value="ground">じめん</option>
-                        <option value="flying">ひこう</option>
-                        <option value="psychic">エスパー</option>
-                        <option value="bug">むし</option>
-                        <option value="rock">いわ</option>
-                        <option value="ghost">ゴースト</option>
-                        <option value="dragon">ドラゴン</option>
-                        <option value="dark">あく</option>
-                        <option value="steel">はがね</option>
-                        <option value="fairy">フェアリー</option>
-                    </select>
-                    <input type="text" id="pokemon-search" placeholder="ポケモンをけんさく" autocomplete="off">
-                    <div id="search-suggestions" class="search-suggestions hidden"></div>
+                <div id="search-settings-container" class="search-settings-container">
+                    <div class="name-inputs">
+                        <div class="name-input-group" id="player1-name-group">
+                            <label for="player1-name">トレーナー 1</label>
+                            <input type="text" id="player1-name" placeholder="おなまえ" maxlength="10">
+                        </div>
+                        <div class="name-input-group hidden" id="player2-name-group">
+                            <label for="player2-name">トレーナー 2</label>
+                            <input type="text" id="player2-name" placeholder="おなまえ" maxlength="10">
+                        </div>
+                    </div>
+                    <div class="pokemon-search-container">
+                        <select id="mode-select">
+                            <option value="full">フルモード</option>
+                            <option value="omakase">おまかせモード</option>
+                            <option value="type">タイプモード</option>
+                        </select>
+                        <select id="region-filter">
+                            <option value="all">すべてのちほう</option>
+                            <option value="gen1">カントー (1-151)</option>
+                            <option value="gen2">ジョウト (152-251)</option>
+                            <option value="gen3">ホウエン (252-386)</option>
+                            <option value="gen4">シンオウ (387-493)</option>
+                            <option value="gen5">イッシュ (494-649)</option>
+                            <option value="gen6">カロス (650-721)</option>
+                            <option value="gen6_za">カロス地方(ZA)</option>
+                            <option value="gen7">アローラ (722-807)</option>
+                            <option value="unknown">不明 (808-809)</option>
+                            <option value="gen8">ガラル (810-905)</option>
+                            <option value="gen9">パルデア (906-)</option>
+                            <option value="hisui">ヒスイ</option>
+                        </select>
+                        <select id="type1-filter">
+                            <option value="all">タイプ1</option>
+                            <option value="normal">ノーマル</option>
+                            <option value="fire">ほのお</option>
+                            <option value="water">みず</option>
+                            <option value="electric">でんき</option>
+                            <option value="grass">くさ</option>
+                            <option value="ice">こおり</option>
+                            <option value="fighting">かくとう</option>
+                            <option value="poison">どく</option>
+                            <option value="ground">じめん</option>
+                            <option value="flying">ひこう</option>
+                            <option value="psychic">エスパー</option>
+                            <option value="bug">むし</option>
+                            <option value="rock">いわ</option>
+                            <option value="ghost">ゴースト</option>
+                            <option value="dragon">ドラゴン</option>
+                            <option value="dark">あく</option>
+                            <option value="steel">はがね</option>
+                            <option value="fairy">フェアリー</option>
+                        </select>
+                        <select id="type2-filter">
+                            <option value="all">タイプ2</option>
+                            <option value="none">なし</option>
+                            <option value="normal">ノーマル</option>
+                            <option value="fire">ほのお</option>
+                            <option value="water">みず</option>
+                            <option value="electric">でんき</option>
+                            <option value="grass">くさ</option>
+                            <option value="ice">こおり</option>
+                            <option value="fighting">かくとう</option>
+                            <option value="poison">どく</option>
+                            <option value="ground">じめん</option>
+                            <option value="flying">ひこう</option>
+                            <option value="psychic">エスパー</option>
+                            <option value="bug">むし</option>
+                            <option value="rock">いわ</option>
+                            <option value="ghost">ゴースト</option>
+                            <option value="dragon">ドラゴン</option>
+                            <option value="dark">あく</option>
+                            <option value="steel">はがね</option>
+                            <option value="fairy">フェアリー</option>
+                        </select>
+                        <input type="text" id="pokemon-search" placeholder="ポケモンをけんさく" autocomplete="off">
+                        <div id="search-suggestions" class="search-suggestions hidden"></div>
+                    </div>
                 </div>
                 <div class="pokemon-grid" id="pokemon-grid">
                     <!-- Javascript will populate this -->
