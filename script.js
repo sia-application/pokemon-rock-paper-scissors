@@ -644,11 +644,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (copyRoomIdBtn) {
         copyRoomIdBtn.addEventListener('click', () => {
+            if (!roomId) return;
+
+            // Fallback function for older browsers or non-secure contexts
+            const fallbackCopyTextToClipboard = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        copyRoomIdBtn.textContent = 'コピーしました！';
+                        setTimeout(() => {
+                            copyRoomIdBtn.textContent = 'コピー';
+                        }, 2000);
+                    } else {
+                        alert('コピーできませんでした。手動でコピーしてください: ' + text);
+                    }
+                } catch (err) {
+                    alert('コピーできませんでした。手動でコピーしてください: ' + text);
+                }
+
+                document.body.removeChild(textArea);
+            };
+
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(roomId);
+                return;
+            }
+
             navigator.clipboard.writeText(roomId).then(() => {
                 copyRoomIdBtn.textContent = 'コピーしました！';
                 setTimeout(() => {
                     copyRoomIdBtn.textContent = 'コピー';
                 }, 2000);
+            }).catch(err => {
+                console.error('Async: Could not copy text: ', err);
+                fallbackCopyTextToClipboard(roomId);
             });
         });
     }
@@ -1934,6 +1975,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let player2Name = '';
     let selectedPokemon = null;
     let loadedCount = 0;
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                })
+                .catch((err) => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        });
+    }
+
+    const POKEMON_COUNT = 1025;
     const BATCH_SIZE = 50;
     let observer = null;
     let currentPokemonList = pokemonData;
