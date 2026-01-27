@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
                 if (err.type === 'unavailable-id') {
-                    showConnectionError('このおへやばんごうはすでにつかわれています');
+                    showConnectionError('このあいことばはすでにつかわれています');
                 } else if (err.type === 'peer-unavailable') {
                     showConnectionError('おへやがみつかりません');
                 } else {
@@ -252,6 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create room (Host)
     async function createRoom() {
+        // If already created, copy to clipboard
+        if (isHost && roomId) {
+            handleCopyRoomId();
+            return;
+        }
+
         roomId = generateRoomId();
         lastCreatedRoomId = roomId; // Store for self-connect check
         isHost = true;
@@ -267,10 +273,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Handle Copy Room ID (for the main button)
+    function handleCopyRoomId() {
+        if (!roomId) return;
+
+        const createRoomBtn = document.getElementById('create-room-btn');
+        const originalText = createRoomBtn.textContent;
+
+        navigator.clipboard.writeText(roomId).then(() => {
+            createRoomBtn.textContent = 'コピーしました！';
+            setTimeout(() => {
+                createRoomBtn.textContent = 'あいことばをコピー';
+            }, 2000);
+        }).catch(err => {
+            // Fallback
+            const textArea = document.createElement("textarea");
+            textArea.value = roomId;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            createRoomBtn.textContent = 'コピーしました！';
+            setTimeout(() => {
+                createRoomBtn.textContent = 'あいことばをコピー';
+            }, 2000);
+        });
+    }
+
     // Join room (Guest)
     async function joinRoom(targetRoomId) {
         if (!targetRoomId || targetRoomId.length === 0) {
-            showConnectionError('おへやばんごうをいれてください');
+            showConnectionError('あいことばをいれてください');
             return;
         }
 
@@ -339,8 +373,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function showRoomCreated(id) {
         statusIcon.textContent = '📡';
         statusText.textContent = 'ともだちをまっています...';
-        roomIdDisplay.classList.remove('hidden');
-        displayRoomId.textContent = id;
+
+        // Hide bottom display
+        roomIdDisplay.classList.add('hidden');
+
+        // Show in card
+        const createdRoomIdInput = document.getElementById('created-room-id-input');
+        const createRoomBtn = document.getElementById('create-room-btn');
+
+        if (createdRoomIdInput) {
+            // createdRoomIdInput.style.display = 'block'; // Always visible now
+            createdRoomIdInput.value = id;
+        }
+
+        if (createRoomBtn) {
+            createRoomBtn.textContent = 'あいことばをコピー';
+        }
+
+        // displayRoomId.textContent = id; // No longer needed
     }
 
     // Show connection error
@@ -630,6 +680,19 @@ document.addEventListener('DOMContentLoaded', () => {
             onlineRoomScreen.classList.add('hidden');
             modeSelectionScreen.classList.remove('hidden');
             modeSelectionScreen.classList.add('active');
+
+            // Reset Create Room UI
+            const createdRoomIdInput = document.getElementById('created-room-id-input');
+            const createRoomBtn = document.getElementById('create-room-btn');
+            if (createdRoomIdInput) {
+                // createdRoomIdInput.style.display = 'none'; // Always visible now
+                createdRoomIdInput.value = '';
+            }
+            if (createRoomBtn) {
+                createRoomBtn.textContent = 'おへやをつくる';
+                createRoomBtn.style.background = ''; // Reset background
+                createRoomBtn.classList.add('create-btn');
+            }
         });
     }
 

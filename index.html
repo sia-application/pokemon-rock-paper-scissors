@@ -51,14 +51,16 @@
                     <div class="room-actions">
                         <div class="room-action-card">
                             <h3>おへやをつくる</h3>
-                            <p>ともだちにおへやばんごうをおしえよう</p>
+                            <p>ともだちにあいことばをおしえよう</p>
+                            <input type="text" id="created-room-id-input" placeholder="あいことば" readonly
+                                style="background-color: #f0f0f0; color: #555;">
                             <button id="create-room-btn" class="action-btn create-btn">おへやをつくる</button>
                         </div>
 
                         <div class="room-action-card">
                             <h3>おへやにはいる</h3>
-                            <p>ともだちのおへやばんごうをいれよう</p>
-                            <input type="text" id="room-id-input" placeholder="おへやばんごう" maxlength="8">
+                            <p>ともだちのあいことばをいれよう</p>
+                            <input type="text" id="room-id-input" placeholder="あいことば" maxlength="8">
                             <button id="join-room-btn" class="action-btn join-btn">はいる</button>
                         </div>
                     </div>
@@ -70,7 +72,7 @@
                             <span id="status-text">せつぞくちゅう...</span>
                         </div>
                         <div id="room-id-display" class="room-id-display hidden">
-                            <p>おへやばんごう:</p>
+                            <p>あいことば:</p>
                             <span id="display-room-id" class="room-id-code"></span>
                             <button id="copy-room-id-btn" class="copy-btn">コピー</button>
                         </div>

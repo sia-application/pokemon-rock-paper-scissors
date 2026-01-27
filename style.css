@@ -1390,18 +1390,20 @@ body.omakase-active .card-close-btn {
 .online-room-container {
     text-align: center;
     padding: 20px;
+    position: relative;
 }
 
 .online-room-container h2 {
     font-size: 1.5rem;
+    margin-top: 50px;
     margin-bottom: 25px;
     color: var(--text-color);
 }
 
 .back-btn {
     position: absolute;
-    left: 20px;
-    top: 20px;
+    left: 10px;
+    top: 10px;
     background: none;
     border: 2px solid #ddd;
     border-radius: 20px;
@@ -1686,6 +1688,7 @@ body.omakase-active .card-close-btn {
     font-weight: bold;
     color: #2e7d32;
 }
+
 /* App Footer */
 .app-footer {
     text-align: center;
