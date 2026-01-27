@@ -157,6 +157,13 @@ main {
     justify-content: center;
 }
 
+@media (min-width: 600px) {
+    main {
+        /* Keep original padding for desktop */
+        padding-top: 180px;
+    }
+}
+
 .screen {
     display: none;
     opacity: 0;
@@ -167,6 +174,17 @@ main {
 .screen.active {
     display: block;
     opacity: 1;
+}
+
+/* Specifically pull up the selection screen to keep the button high */
+#selection-screen.active {
+    margin-top: -60px;
+}
+
+@media (max-width: 600px) {
+    #selection-screen.active {
+        margin-top: -20px;
+    }
 }
 
 /* Name Input on Selection Screen */
@@ -1726,9 +1744,11 @@ body.omakase-active .card-close-btn {
 /* Search Settings Toggle */
 .search-toggle-header {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-    padding-right: 15px;
+    justify-content: center;
+    /* Center the button */
+    margin-bottom: 20px;
+    margin-top: -10px;
+    /* Pull it slightly up */
     position: relative;
     z-index: 100;
 }
