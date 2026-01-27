@@ -55,9 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
                 if (err.type === 'unavailable-id') {
-                    showConnectionError('このルームIDはすでにつかわれています');
+                    showConnectionError('このおへやばんごうはすでにつかわれています');
                 } else if (err.type === 'peer-unavailable') {
-                    showConnectionError('ルームがみつかりません');
+                    showConnectionError('おへやがみつかりません');
                 } else {
                     showConnectionError('せつぞくエラー: ' + err.type);
                 }
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = true;
         isOnlineMode = true;
 
-        showConnectionStatus('ルームをつくっています...');
+        showConnectionStatus('おへやをつくっています...');
 
         try {
             await initPeer(roomId);
@@ -270,13 +270,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Join room (Guest)
     async function joinRoom(targetRoomId) {
         if (!targetRoomId || targetRoomId.length === 0) {
-            showConnectionError('ルームIDをいれてください');
+            showConnectionError('おへやばんごうをいれてください');
             return;
         }
 
         // Prevent joining own room (same browser/same person)
         if (targetRoomId.toUpperCase() === lastCreatedRoomId) {
-            showConnectionError('じぶんでつくったルームにははいれません');
+            showConnectionError('じぶんでつくったおへやにははいれません');
             return;
         }
 
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isOnlineMode = true;
         roomId = targetRoomId.toUpperCase();
 
-        showConnectionStatus('ルームにせつぞくちゅう...');
+        showConnectionStatus('おへやにせつぞくちゅう...');
 
         try {
             await initPeer();
@@ -2829,7 +2829,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     randomCard.classList.add('selected');
                 }
 
-                instructionText.textContent = 'もういちどクリックでけってい！';
+                instructionText.textContent = 'もういちどおしてけってい！';
 
                 // Show cancel button
                 const cancelBtn = document.getElementById('cancel-selection-btn');
@@ -2899,7 +2899,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     randomCard.classList.add('selected');
                 }
 
-                instructionText.textContent = 'もういちどクリックでけってい！';
+                instructionText.textContent = 'もういちどおしてけってい！';
 
                 // Disable selection UI after confirming selection
 
@@ -3074,7 +3074,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { result, p1Multiplier, p2Multiplier, p1Process, p2Process } = calculateEffectiveness(p1.types, p2.types);
 
         // Update instruction
-        instructionText.textContent = 'しょうぶあり！';
+        instructionText.textContent = 'そこまで！';
 
         let message = '';
         const gameHeader = document.querySelector('.game-header');

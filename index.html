@@ -20,7 +20,7 @@
     <div class="app-container">
         <header class="game-header">
             <h1>ポケモンタイプじゃんけん</h1>
-            <p id="instruction-text">たいせんモードをえらぼう！</p>
+            <p id="instruction-text">バトルモードをえらぼう！</p>
         </header>
 
         <main id="game-area">
@@ -30,12 +30,12 @@
                     <div class="mode-buttons">
                         <button id="local-mode-btn" class="mode-btn local-btn">
                             <span class="mode-icon">🎮</span>
-                            <span class="mode-title">ローカルたいせん</span>
-                            <span class="mode-desc">となりのともだちと！</span>
+                            <span class="mode-title">ローカル<br>バトル</span>
+                            <span class="mode-desc">ちかくのともだちと！</span>
                         </button>
                         <button id="online-mode-btn" class="mode-btn online-btn">
                             <span class="mode-icon">🌐</span>
-                            <span class="mode-title">オンラインたいせん</span>
+                            <span class="mode-title">オンライン<br>バトル</span>
                             <span class="mode-desc">はなれたともだちと！</span>
                         </button>
                     </div>
@@ -50,15 +50,15 @@
 
                     <div class="room-actions">
                         <div class="room-action-card">
-                            <h3>ルームをつくる</h3>
-                            <p>ともだちにルームIDをおしえよう</p>
-                            <button id="create-room-btn" class="action-btn create-btn">ルームをつくる</button>
+                            <h3>おへやをつくる</h3>
+                            <p>ともだちにおへやばんごうをおしえよう</p>
+                            <button id="create-room-btn" class="action-btn create-btn">おへやをつくる</button>
                         </div>
 
                         <div class="room-action-card">
-                            <h3>ルームにはいる</h3>
-                            <p>ともだちのルームIDをいれよう</p>
-                            <input type="text" id="room-id-input" placeholder="ルームID" maxlength="8">
+                            <h3>おへやにはいる</h3>
+                            <p>ともだちのおへやばんごうをいれよう</p>
+                            <input type="text" id="room-id-input" placeholder="おへやばんごう" maxlength="8">
                             <button id="join-room-btn" class="action-btn join-btn">はいる</button>
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                             <span id="status-text">せつぞくちゅう...</span>
                         </div>
                         <div id="room-id-display" class="room-id-display hidden">
-                            <p>ルームID:</p>
+                            <p>おへやばんごう:</p>
                             <span id="display-room-id" class="room-id-code"></span>
                             <button id="copy-room-id-btn" class="copy-btn">コピー</button>
                         </div>
