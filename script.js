@@ -2902,7 +2902,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cancelBtn.classList.remove('hidden');
                 }
 
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+
             } else {
                 // Second click - confirm selection
                 if (isOnlineMode && !isHost) {
@@ -2976,7 +2976,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cancelBtn.classList.remove('hidden');
                 }
 
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+
             } else {
                 // Second click - confirm and start battle
                 player2Name = player2NameInput.value.trim() || 'トレーナー 2';
