@@ -2029,7 +2029,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPokemonGrid();
 
         // Header Reset
-        document.querySelector('.game-header').addEventListener('click', resetGame);
+        document.querySelector('.game-header').addEventListener('click', () => {
+            const modeScreen = document.getElementById('mode-selection-screen');
+            if (modeScreen && modeScreen.classList.contains('active')) {
+                return; // Do nothing on title screen
+            }
+            if (confirm('トップページに戻りますか？')) {
+                location.reload();
+            }
+        });
 
         restartBtn.addEventListener('click', resetGame);
         pokemonSearchInput.addEventListener('input', handleSearchInput);
