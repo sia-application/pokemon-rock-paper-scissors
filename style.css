@@ -183,7 +183,7 @@ main {
 
 @media (max-width: 600px) {
     #selection-screen.active {
-        margin-top: -20px;
+        margin-top: 0px;
     }
 }
 
@@ -1747,8 +1747,8 @@ body.omakase-active .card-close-btn {
     justify-content: center;
     /* Center the button */
     margin-bottom: 20px;
-    margin-top: -10px;
-    /* Pull it slightly up */
+    margin-top: 5px;
+    /* Small positive margin instead of negative */
     position: relative;
     z-index: 100;
 }
