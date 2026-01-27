@@ -40,19 +40,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelConnectionBtn = document.getElementById('cancel-connection-btn');
 
     // Generate random room ID (8 chars uppercase)
+    // Generate random room ID (Random Pokemon Name)
     function generateRoomId() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 8; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        if (!pokemonData || pokemonData.length === 0) {
+            // Fallback to alphanumeric if data not loaded
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
         }
-        return result;
+
+        // Filter for simple names: no parentheses, no special characters, max 10 chars
+        const simpleNames = pokemonData
+            .map(p => p.name)
+            .filter(name => {
+                return !name.includes('(') &&
+                    !name.includes('・') &&
+                    !name.includes(' ') &&
+                    name.length <= 10;
+            });
+
+        const listToUse = simpleNames.length > 0 ? simpleNames : pokemonData.map(p => p.name);
+        return listToUse[Math.floor(Math.random() * listToUse.length)];
+    }
+
+    // Safe ID encoding (Hex) to allow Japanese characters in PeerJS IDs
+    function encodeIdSafe(str) {
+        if (!str) return str;
+        return Array.from(new TextEncoder().encode(str.trim()))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
     }
 
     // Initialize PeerJS
     function initPeer(id = null) {
         return new Promise((resolve, reject) => {
-            const peerId = id ? `pokemon-janken-${id}` : undefined;
+            const peerId = id ? `pokemon-janken-${encodeIdSafe(id)}` : undefined;
             peer = new Peer(peerId, {
                 debug: 1
             });
@@ -327,13 +352,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isHost = false;
         isOnlineMode = true;
-        roomId = targetRoomId.toUpperCase();
+        roomId = targetRoomId.trim();
 
         showConnectionStatus('おへやにせつぞくちゅう...');
 
         try {
             await initPeer();
-            conn = peer.connect(`pokemon-janken-${roomId}`);
+            const peerIdToConnect = `pokemon-janken-${encodeIdSafe(roomId)}`;
+            conn = peer.connect(peerIdToConnect);
             setupConnectionHandlers();
         } catch (err) {
             console.error('Failed to join room:', err);
