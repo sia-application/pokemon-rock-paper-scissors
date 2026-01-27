@@ -1959,6 +1959,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDisplay = document.getElementById('result-display');
     const resultMessage = document.getElementById('result-message');
     const restartBtn = document.getElementById('restart-btn');
+    const returnToStartBtn = document.getElementById('return-to-start-btn');
     const instructionText = document.getElementById('instruction-text');
     const player1NameInput = document.getElementById('player1-name');
     const player2NameInput = document.getElementById('player2-name');
@@ -2041,6 +2042,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         restartBtn.addEventListener('click', resetGame);
+        if (returnToStartBtn) {
+            returnToStartBtn.addEventListener('click', () => {
+                location.reload();
+            });
+        }
         pokemonSearchInput.addEventListener('input', handleSearchInput);
         pokemonSearchInput.addEventListener('blur', () => {
             // Delay to allow click on suggestion
@@ -3080,6 +3086,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Player 1 Wins (Red)
             gameHeader.classList.remove('player2-turn');
             restartBtn.style.background = 'var(--primary-color)';
+            if (returnToStartBtn) returnToStartBtn.style.background = 'var(--primary-color)';
 
         } else if (result === 'lose') {
             message = `${player2Name} のかち！`;
@@ -3088,6 +3095,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Player 2 Wins (Blue)
             gameHeader.classList.add('player2-turn');
             restartBtn.style.background = 'var(--secondary-color)';
+            if (returnToStartBtn) returnToStartBtn.style.background = 'var(--secondary-color)';
 
         } else {
             message = 'ひきわけ';
@@ -3097,6 +3105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gameHeader.classList.remove('player2-turn');
             gameHeader.classList.add('draw-result');
             restartBtn.style.background = '#9E9E9E';
+            if (returnToStartBtn) returnToStartBtn.style.background = '#9E9E9E';
         }
 
         resultMessage.textContent = message;
@@ -3228,6 +3237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             document.querySelector('.game-header').classList.remove('draw-result');
             restartBtn.style.background = '';
+            if (returnToStartBtn) returnToStartBtn.style.background = '#757575'; // Reset to default grey
 
             // Show selection screen (keep connection)
             selectionScreen.classList.remove('hidden');
@@ -3271,6 +3281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.game-header').classList.remove('player2-turn');
         document.querySelector('.game-header').classList.remove('draw-result');
         restartBtn.style.background = ''; // Reset button color
+        if (returnToStartBtn) returnToStartBtn.style.background = '#757575'; // Reset to default grey
 
         player1NameInput.value = '';
         player2NameInput.value = '';
