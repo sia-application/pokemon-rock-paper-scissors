@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
                 if (err.type === 'unavailable-id') {
-                    showConnectionError('このルームIDは すでにつかわれています');
+                    showConnectionError('このルームIDはすでにつかわれています');
                 } else if (err.type === 'peer-unavailable') {
                     showConnectionError('ルームがみつかりません');
                 } else {
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-enable selection UI
         enableSelectionUI();
 
-        instructionText.textContent = 'つぎの ポケモンを えらぼう！';
+        instructionText.textContent = 'つぎのポケモンをえらぼう！';
     }
 
     // Check if both players have selected
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Prevent joining own room (same browser/same person)
         if (targetRoomId.toUpperCase() === lastCreatedRoomId) {
-            showConnectionError('じぶんでつくった ルームには はいれません');
+            showConnectionError('じぶんでつくったルームにははいれません');
             return;
         }
 
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Setup for online mode
         if (isOnlineMode) {
-            instructionText.textContent = 'ポケモンを えらぼう！';
+            instructionText.textContent = 'ポケモンをえらぼう！';
 
             if (isHost) {
                 // Host is Trainer 1
@@ -473,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show waiting for opponent indicator
     function showWaitingIndicator() {
         waitingForOpponent = true;
-        instructionText.textContent = 'あいての せんたくを まっています...';
+        instructionText.textContent = 'あいてのせんたくをまっています...';
 
         // Add waiting indicator if not exists
         let waitingEl = document.querySelector('.waiting-indicator');
@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             waitingEl.className = 'waiting-indicator';
             waitingEl.innerHTML = `
                 <span class="waiting-icon">⏳</span>
-                <p>あいてを まっています...</p>
+                <p>あいてをまっています...</p>
             `;
             selectionScreen.insertBefore(waitingEl, selectionScreen.firstChild);
         }
@@ -511,11 +511,11 @@ document.addEventListener('DOMContentLoaded', () => {
             indicatorEl.className = 'opponent-ready-indicator';
             indicatorEl.innerHTML = `
                 <span class="ready-icon">✅</span>
-                <p>あいてが えらびました！</p>
+                <p>あいてがえらびました！</p>
             `;
             selectionScreen.insertBefore(indicatorEl, selectionScreen.firstChild);
         }
-        instructionText.textContent = 'あなたも えらぼう！';
+        instructionText.textContent = 'あなたもえらぼう！';
     }
 
     // Send pokemon selection to peer
@@ -610,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modeSelectionScreen.classList.add('hidden');
             selectionScreen.classList.remove('hidden');
             selectionScreen.classList.add('active');
+            instructionText.textContent = 'ポケモンをえらぼう！';
         });
     }
 
@@ -2034,7 +2035,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modeScreen && modeScreen.classList.contains('active')) {
                 return; // Do nothing on title screen
             }
-            if (confirm('トップページに戻りますか？')) {
+            if (confirm('トップページにもどりますか？')) {
                 location.reload();
             }
         });
@@ -2186,7 +2187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.classList.remove('omakase-active');
                 pokemonGrid.classList.remove('disabled');
                 pokemonSearchInput.disabled = false;
-                pokemonSearchInput.placeholder = 'ポケモン名でけんさく';
+                pokemonSearchInput.placeholder = 'ポケモンのなまえでけんさく';
 
                 // Enable region/type filters for everyone in Full mode
                 document.getElementById('region-filter').disabled = false;
@@ -2630,7 +2631,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateInstruction() {
-        instructionText.textContent = 'ポケモンを えらぼう！';
+        instructionText.textContent = 'ポケモンをえらぼう！';
     }
 
     function getRandomPokemon() {
@@ -2822,7 +2823,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     randomCard.classList.add('selected');
                 }
 
-                instructionText.textContent = 'もういちど クリックで けってい！';
+                instructionText.textContent = 'もういちどクリックでけってい！';
 
                 // Show cancel button
                 const cancelBtn = document.getElementById('cancel-selection-btn');
@@ -2892,7 +2893,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     randomCard.classList.add('selected');
                 }
 
-                instructionText.textContent = 'もういちど クリックで けってい！';
+                instructionText.textContent = 'もういちどクリックでけってい！';
 
                 // Disable selection UI after confirming selection
 
@@ -2946,7 +2947,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (randomCard) randomCard.style.pointerEvents = 'none';
 
         // Update instruction
-        instructionText.textContent = 'あいての せんたくを まっています...';
+        instructionText.textContent = 'あいてのせんたくをまっています...';
     }
 
     // Enable selection UI (for reset/rematch)
@@ -3020,7 +3021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.game-header').classList.remove('player2-turn');
 
         // Update instruction
-        instructionText.textContent = 'バトル スタート！';
+        instructionText.textContent = 'バトルスタート！';
 
         // Set pokemon names
         document.getElementById('player1-pokemon-name').textContent = player1.name;
@@ -3067,7 +3068,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { result, p1Multiplier, p2Multiplier, p1Process, p2Process } = calculateEffectiveness(p1.types, p2.types);
 
         // Update instruction
-        instructionText.textContent = 'しょうぶ あり！';
+        instructionText.textContent = 'しょうぶあり！';
 
         let message = '';
         const gameHeader = document.querySelector('.game-header');
@@ -3246,7 +3247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Re-enable selection UI
             enableSelectionUI();
 
-            instructionText.textContent = 'つぎの ポケモンを えらぼう！';
+            instructionText.textContent = 'つぎのポケモンをえらぼう！';
             return;
         }
 

@@ -20,7 +20,7 @@
     <div class="app-container">
         <header class="game-header">
             <h1>ポケモンタイプじゃんけん</h1>
-            <p id="instruction-text">ポケモンを えらぼう！</p>
+            <p id="instruction-text">たいせんモードをえらぼう！</p>
         </header>
 
         <main id="game-area">
@@ -52,13 +52,13 @@
                     <div class="room-actions">
                         <div class="room-action-card">
                             <h3>ルームをつくる</h3>
-                            <p>ともだちに ルームIDを おしえよう</p>
+                            <p>ともだちにルームIDをおしえよう</p>
                             <button id="create-room-btn" class="action-btn create-btn">ルームをつくる</button>
                         </div>
 
                         <div class="room-action-card">
                             <h3>ルームにはいる</h3>
-                            <p>ともだちの ルームIDを いれよう</p>
+                            <p>ともだちのルームIDをいれよう</p>
                             <input type="text" id="room-id-input" placeholder="ルームID" maxlength="8">
                             <button id="join-room-btn" class="action-btn join-btn">はいる</button>
                         </div>
@@ -234,13 +234,13 @@
                 <!-- View Result Button -->
                 <div style="text-align: center; margin-top: 30px;">
                     <button id="view-result-btn" class="action-btn hidden"
-                        style="background: #ff5722; color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,87,34,0.4); transition: transform 0.2s;">
+                        style="background: #ff5722; color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,87,34,0.4); transition: transform 0.2s; width: auto;">
                         かちまけをみる！
                     </button>
                 </div>
                 <div id="result-display" class="result-display hidden">
                     <h2 id="result-message"></h2>
-                    <button id="restart-btn" class="btn-primary">もういちど あそぶ</button>
+                    <button id="restart-btn" class="btn-primary">もういちどあそぶ</button>
                 </div>
             </div>
         </main>
