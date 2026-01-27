@@ -3018,7 +3018,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (randomCard) randomCard.style.pointerEvents = 'none';
 
         // Update instruction
-        instructionText.textContent = 'あいてのせんたくをまっています...';
+        // instructionText.textContent = 'あいてのせんたくをまっています...'; // Moved to showWaitingIndicator
     }
 
     // Enable selection UI (for reset/rematch)

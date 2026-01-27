@@ -1698,3 +1698,20 @@ body.omakase-active .card-close-btn {
     border-top: 1px solid #eee;
     background: #fdfdfd;
 }
+
+/* Result Action Buttons */
+.result-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.result-action-buttons button {
+    width: 100%;
+    margin: 0 !important;
+}
