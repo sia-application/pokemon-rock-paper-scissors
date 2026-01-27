@@ -178,12 +178,12 @@ main {
 
 /* Specifically pull up the selection screen to keep the button high */
 #selection-screen.active {
-    margin-top: -60px;
+    margin-top: -85px;
 }
 
 @media (max-width: 600px) {
     #selection-screen.active {
-        margin-top: 0px;
+        margin-top: -25px;
     }
 }
 
@@ -1746,9 +1746,9 @@ body.omakase-active .card-close-btn {
     display: flex;
     justify-content: center;
     /* Center the button */
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     margin-top: 5px;
-    /* Small positive margin instead of negative */
+    /* Extra tight symmetric margins */
     position: relative;
     z-index: 100;
 }
