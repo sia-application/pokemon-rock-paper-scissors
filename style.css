@@ -150,7 +150,7 @@ body {
 main {
     flex: 1;
     padding: 20px;
-    padding-top: 130px;
+    padding-top: 180px;
     /* Space for fixed header */
     display: flex;
     flex-direction: column;
