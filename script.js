@@ -670,6 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modeSelectionScreen.classList.add('hidden');
             onlineRoomScreen.classList.remove('hidden');
             onlineRoomScreen.classList.add('active');
+            instructionText.textContent = 'はなれたともだちとあそぼう！';
         });
     }
 
@@ -680,6 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
             onlineRoomScreen.classList.add('hidden');
             modeSelectionScreen.classList.remove('hidden');
             modeSelectionScreen.classList.add('active');
+            instructionText.textContent = 'たいせんモードをえらぼう！';
 
             // Reset Create Room UI
             const createdRoomIdInput = document.getElementById('created-room-id-input');

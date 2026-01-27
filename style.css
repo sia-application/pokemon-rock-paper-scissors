@@ -1401,9 +1401,8 @@ body.omakase-active .card-close-btn {
 }
 
 .back-btn {
-    position: absolute;
-    left: 10px;
-    top: 10px;
+    /* position: absolute; removed */
+    display: inline-block;
     background: none;
     border: 2px solid #ddd;
     border-radius: 20px;
