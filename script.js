@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle rematch request from opponent
     function handleRematch() {
+        window.scrollTo(0, 0);
         // Reset game state
         myPokemonSelected = null;
         opponentPokemonSelected = null;
@@ -414,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show selection screen
     function showSelectionScreen() {
+        window.scrollTo(0, 0);
         selectionScreen.classList.remove('hidden');
         selectionScreen.classList.add('active');
 
@@ -492,6 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show mode selection screen
     function showModeSelectionScreen() {
+        window.scrollTo(0, 0);
         modeSelectionScreen.classList.remove('hidden');
         modeSelectionScreen.classList.add('active');
         onlineRoomScreen.classList.remove('active');
@@ -665,6 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Online Mode Event Listeners ---
     if (localModeBtn) {
         localModeBtn.addEventListener('click', () => {
+            window.scrollTo(0, 0);
             isOnlineMode = false;
             modeSelectionScreen.classList.remove('active');
             modeSelectionScreen.classList.add('hidden');
@@ -676,6 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (onlineModeBtn) {
         onlineModeBtn.addEventListener('click', () => {
+            window.scrollTo(0, 0);
             modeSelectionScreen.classList.remove('active');
             modeSelectionScreen.classList.add('hidden');
             onlineRoomScreen.classList.remove('hidden');
@@ -686,6 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (backToModeBtn) {
         backToModeBtn.addEventListener('click', () => {
+            window.scrollTo(0, 0);
             cancelConnection();
             onlineRoomScreen.classList.remove('active');
             onlineRoomScreen.classList.add('hidden');
@@ -2544,6 +2550,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTypeBattle(p1, p2) {
+        window.scrollTo(0, 0);
         clearBattleResult();
         selectionScreen.classList.remove('active');
         selectionScreen.classList.add('hidden');
@@ -3093,6 +3100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame(player1, player2) {
+        window.scrollTo(0, 0);
         clearBattleResult();
         // Update labels with player names
         player1Label.textContent = player1Name;
@@ -3268,6 +3276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGame() {
+        window.scrollTo(0, 0);
         if (actionTimeout) clearTimeout(actionTimeout);
         clearBattleResult();
         battleScreen.classList.remove('active');
