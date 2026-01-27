@@ -1781,6 +1781,6 @@ body.omakase-active .card-close-btn {
     pointer-events: none;
 }
 
-.toggle-search-btn.collapsed #toggle-icon {
+.toggle-search-btn:not(.collapsed) #toggle-icon {
     transform: rotate(180deg);
 }
