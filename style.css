@@ -1338,6 +1338,10 @@ body.omakase-active .card-close-btn {
 /* ===== Online Mode Styles ===== */
 
 /* Mode Selection Screen */
+#mode-selection-screen.active {
+    margin-top: -100px;
+}
+
 .mode-selection-container {
     text-align: center;
     padding: 20px;
