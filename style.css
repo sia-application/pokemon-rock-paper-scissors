@@ -1328,10 +1328,14 @@ body.omakase-active .card-close-btn {
     .multiplier-process {
         min-width: unset;
         width: 100%;
-        max-width: 135px;
+        max-width: unset;
         /* Limit width to fit narrow screens */
-        padding: 4px 8px;
-        font-size: 0.75rem;
+        padding: 4px 5px;
+        font-size: 0.7rem;
+    }
+
+    .multiplier-process div {
+        white-space: nowrap;
     }
 }
 
