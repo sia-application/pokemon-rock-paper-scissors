@@ -98,6 +98,13 @@ body {
     margin-bottom: 0.5rem;
 }
 
+@media (max-width: 600px) {
+    .game-header h1 {
+        font-size: 1.2rem;
+        white-space: nowrap;
+    }
+}
+
 .game-header p {
     font-size: 1rem;
     opacity: 0.9;
