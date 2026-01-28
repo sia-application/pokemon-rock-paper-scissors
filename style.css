@@ -1420,6 +1420,10 @@ body.omakase-active .card-close-btn {
 }
 
 /* Online Room Screen */
+#online-room-screen.active {
+    margin-top: -100px;
+}
+
 .online-room-container {
     text-align: center;
     padding: 20px;
