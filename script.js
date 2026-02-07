@@ -371,6 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.textContent = 'せつぞくしました！';
         cancelConnectionBtn.classList.add('hidden');
 
+        // If Host, send current settings to Guest immediately
+        if (isHost) {
+            sendCurrentSettings();
+        }
+
         // Short delay then go to rule setting screen
         setTimeout(() => {
             // Hide online room screen
@@ -719,7 +724,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.constraint !== undefined) {
             applyConstraintChange(data.constraint === true || data.constraint === 'true');
         }
+
+        if (data.ruleRegions !== undefined) {
+            ruleRegions = data.ruleRegions;
+            const container = document.getElementById('rule-region-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleRegions.includes(cb.value);
+                });
+                updateBulkButtonLabel('rule-region-checkboxes');
+            }
+        }
+        if (data.ruleTypes !== undefined) {
+            ruleTypes = data.ruleTypes;
+            const container = document.getElementById('rule-type-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleTypes.includes(cb.value);
+                });
+                updateBulkButtonLabel('rule-type-checkboxes');
+            }
+        }
+
         syncSelectionFiltersWithRules();
+    }
+
+    // Helper to update bulk button label
+    function updateBulkButtonLabel(containerId) {
+        const btn = document.querySelector(`.toggle-bulk-btn[data-target="${containerId}"]`);
+        const container = document.getElementById(containerId);
+        if (btn && container) {
+            const checkboxes = container.querySelectorAll('input');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            btn.textContent = (checkedCount === checkboxes.length) ? '全解除' : '全選択';
+        }
     }
 
     // Cancel connection
@@ -825,10 +863,68 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyGameSettings(settings) {
         if (settings.mode) {
             document.getElementById('mode-select').value = settings.mode;
+            handleModeChange({ target: { value: settings.mode }, fromPeer: true });
         }
         if (settings.region) {
             document.getElementById('region-filter').value = settings.region;
+            handleRegionChange({ target: { value: settings.region }, fromPeer: true });
         }
+        if (settings.type1) {
+            document.getElementById('type1-filter').value = settings.type1;
+            handleType1Change({ target: { value: settings.type1 }, fromPeer: true });
+        }
+        if (settings.type2) {
+            document.getElementById('type2-filter').value = settings.type2;
+            handleType2Change({ target: { value: settings.type2 }, fromPeer: true });
+        }
+
+        if (settings.ruleRegions) {
+            ruleRegions = settings.ruleRegions;
+            const container = document.getElementById('rule-region-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleRegions.includes(cb.value);
+                });
+                updateBulkButtonLabel('rule-region-checkboxes');
+            }
+        }
+        if (settings.ruleTypes) {
+            ruleTypes = settings.ruleTypes;
+            const container = document.getElementById('rule-type-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleTypes.includes(cb.value);
+                });
+                updateBulkButtonLabel('rule-type-checkboxes');
+            }
+        }
+
+        // Sync Type Mode Rules
+        if (settings.battleRule !== undefined) {
+            applyBattleRuleChange(settings.battleRule === 'double');
+        }
+        if (settings.constraint !== undefined) {
+            applyConstraintChange(settings.constraint);
+        }
+
+        syncSelectionFiltersWithRules();
+    }
+
+    // Send current settings to peer (Host -> Guest on connect)
+    function sendCurrentSettings() {
+        if (!isHost || !conn) return;
+
+        const settings = {
+            mode: currentMode,
+            region: currentRegionFilter,
+            type1: currentType1Filter,
+            type2: currentType2Filter,
+            ruleRegions: ruleRegions,
+            ruleTypes: ruleTypes,
+            battleRule: typeBattleMode,
+            constraint: isDoubleTypeRequired
+        };
+        conn.send({ type: 'game_settings', settings: settings });
     }
 
     // Apply settings change from peer (real-time sync)
