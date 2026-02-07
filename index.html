@@ -19,7 +19,8 @@
 <body>
     <div class="app-container">
         <header class="game-header">
-            <h1>ポケモンタイプじゃんけん</h1>
+            <h1><a href="#" onclick="handleAppUpdate(event)"
+                    style="color: inherit; text-decoration: none;">ポケモンタイプじゃんけん</a></h1>
             <p id="instruction-text">バトルモードをえらぼう！</p>
         </header>
 
@@ -415,12 +416,39 @@
         </main>
 
         <footer class="app-footer">
-            <p>made for sia v2.2.2</p>
-            <button id="reset-app-btn" class="reset-app-btn">こうしん</button>
+            <p>made for sia v2.2.4</p>
         </footer>
     </div>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Update Logic (Inline Function)
+        function handleAppUpdate(e) {
+            if (e) e.preventDefault();
+
+            if (confirm('アプリを再起動して、最新の状態にしますか？\n（オフラインデータも一度リセットされます）')) {
+                // Unregister Service Worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                        for (let registration of registrations) {
+                            registration.unregister();
+                        }
+                    });
+                }
+
+                // Clear Caches
+                caches.keys().then(function (names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                }).then(function () {
+                    // Force Reload (true forces reload from server)
+                    window.location.reload(true);
+                });
+            }
+            return false;
+        }
+    </script>
 </body>
 
 </html>

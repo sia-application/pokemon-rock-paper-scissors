@@ -2520,15 +2520,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPokemonGrid();
 
         // Header Reset
-        document.querySelector('.game-header').addEventListener('click', () => {
-            const modeScreen = document.getElementById('mode-selection-screen');
-            if (modeScreen && modeScreen.classList.contains('active')) {
-                return; // Do nothing on title screen
-            }
-            if (confirm('トップページにもどりますか？')) {
-                location.reload();
-            }
-        });
+        // Header Reset (Removed as per user request to use header for Update trigger only)
+        // document.querySelector('.game-header').addEventListener('click', ...);
 
         restartBtn.addEventListener('click', resetGame);
         if (returnToStartBtn) {
@@ -4243,31 +4236,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateInstruction();
-
-    // Reset App Button Logic
-    const resetAppBtn = document.getElementById('reset-app-btn');
-    if (resetAppBtn) {
-        resetAppBtn.addEventListener('click', () => {
-            if (confirm('アプリをさいきどうして、最新の状態にしますか？\n（オフラインデータも一度リセットされます）')) {
-                // Unregister Service Worker
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                        for (let registration of registrations) {
-                            registration.unregister();
-                        }
-                    });
-                }
-
-                // Clear Caches
-                caches.keys().then(function (names) {
-                    for (let name of names) {
-                        caches.delete(name);
-                    }
-                }).then(() => {
-                    // Force Reload
-                    window.location.reload(true);
-                });
-            }
-        });
-    }
 });
