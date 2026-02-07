@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokemon-rps-v2';
+const CACHE_NAME = 'pokemon-rps-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -13,6 +13,9 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] Install');
+    // Force the waiting service worker to become the active service worker
+    self.skipWaiting();
+
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('[Service Worker] Caching all: app shell and content');
@@ -23,6 +26,9 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     console.log('[Service Worker] Activate');
+    // Take control of all clients immediately
+    event.waitUntil(self.clients.claim());
+
     event.waitUntil(
         caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {

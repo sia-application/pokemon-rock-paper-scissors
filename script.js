@@ -2414,10 +2414,29 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.serviceWorker.register('./sw.js')
                 .then((registration) => {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                    // Check for updates on load
+                    registration.update();
+
+                    // If a waiting worker exists, it means there is an update ready
+                    if (registration.waiting) {
+                        // We rely on skipWaiting() in sw.js to activate it, 
+                        // or we could postMessage here if needed.
+                        // But since we added self.skipWaiting() in sw.js install event,
+                        // it should activate automatically.
+                    }
                 })
                 .catch((err) => {
                     console.log('ServiceWorker registration failed: ', err);
                 });
+
+            // Reload page when new service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
         });
     }
 
