@@ -560,6 +560,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const options2 = Array.from(type2Filter.options).map(o => o.value);
             type2Filter.value = options2.includes(currentType2) ? currentType2 : 'all';
         }
+
+        // --- Sync Type Selection Grid (Type Mode) ---
+        const typeGrid = document.getElementById('type-selection-grid');
+        if (typeGrid) {
+            const buttons = typeGrid.querySelectorAll('.type-btn');
+            buttons.forEach(btn => {
+                const type = btn.dataset.type;
+                if (ruleTypes.includes(type)) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.3';
+                    if (btn.classList.contains('selected')) {
+                        btn.classList.remove('selected');
+                        player1SelectedTypes = player1SelectedTypes.filter(t => t !== type);
+                    }
+                }
+            });
+        }
     }
 
     // Disable filters for guest in online mode
@@ -2440,6 +2460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (containerId === 'rule-region-checkboxes') ruleRegions = selected;
                 else ruleTypes = selected;
                 sendSettingsChange(syncKey, selected);
+                syncSelectionFiltersWithRules();
             };
             container.querySelectorAll('input').forEach(cb => {
                 cb.addEventListener('change', updateState);
@@ -2547,6 +2568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
 
         // Battle Rule Buttons (1タイプ / 2タイプ)
+        // Battle Rule Buttons (1タイプ / 2タイプ)
         document.querySelectorAll('#battle-rule-buttons .segment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const isDouble = (btn.dataset.value === 'double');
@@ -2623,6 +2645,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // Validation: For "2 Types Required" rule, at least 2 types must be available
+                if (currentMode === 'type' && typeBattleMode === 'double' && isDoubleTypeRequired) {
+                    if (checkedTypes.length < 2) {
+                        alert('「2つ必須」のルールでは、タイプを 2つ以上 有効にしてください！');
+                        // Open type accordion if closed
+                        const typeAccordion = document.getElementById('type-accordion-group');
+                        if (typeAccordion && !typeAccordion.classList.contains('open')) {
+                            const trigger = typeAccordion.querySelector('.accordion-trigger');
+                            if (trigger) trigger.click();
+                        }
+                        return;
+                    }
+                }
+
                 showSelectionScreen();
                 if (isOnlineMode && isHost && conn) {
                     conn.send({ type: 'proceed_to_selection' });
@@ -2630,7 +2666,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Back to Rules from Selection
+
         const backToRulesBtn = document.getElementById('back-to-rules-btn');
         if (backToRulesBtn) {
             backToRulesBtn.addEventListener('click', () => {
@@ -2790,6 +2826,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (desc) desc.textContent = '1つのタイプをえらんでたたかいます';
         }
 
+        // Auto-set constraint to "Required" (true) when switching to Double mode for better UX
+        // This ensures validation is active by default.
+        if (typeBattleMode === 'double') {
+            applyConstraintChange(true);
+            // Also update the toggle if it existed (but we use buttons now)
+        }
+
         // Reset selections on rules change
         player1SelectedTypes = [];
         player2SelectedTypes = [];
@@ -2935,9 +2978,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentSelection = isPlayer1Turn ? player1SelectedTypes : player2SelectedTypes;
 
-        if (typeBattleMode === 'double' && isDoubleTypeRequired && currentSelection.length < 2) {
-            alert('2つのタイプを選択してください！');
-            return;
+        if (typeBattleMode === 'double' && isDoubleTypeRequired) {
+            if (currentSelection.length < 2) {
+                alert('2つのタイプをえらんでください！');
+                return;
+            }
         }
         if (currentMode !== 'type') return;
 
