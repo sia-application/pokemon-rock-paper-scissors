@@ -4243,4 +4243,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateInstruction();
+
+    // Reset App Button Logic
+    const resetAppBtn = document.getElementById('reset-app-btn');
+    if (resetAppBtn) {
+        resetAppBtn.addEventListener('click', () => {
+            if (confirm('アプリをさいきどうして、最新の状態にしますか？\n（オフラインデータも一度リセットされます）')) {
+                // Unregister Service Worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                        for (let registration of registrations) {
+                            registration.unregister();
+                        }
+                    });
+                }
+
+                // Clear Caches
+                caches.keys().then(function (names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                }).then(() => {
+                    // Force Reload
+                    window.location.reload(true);
+                });
+            }
+        });
+    }
 });
