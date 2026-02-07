@@ -170,15 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'settings_change':
                 // Host changed settings, apply to guest
-                if (!isHost) {
-                    applySettingsChange(data);
-                }
+                // OR Guest changed settings, apply to host
+                applySettingsChange(data);
                 break;
             case 'rule_changed':
-                // Sync specific rule change from host
-                if (!isHost) {
-                    applyRuleChange(data);
-                }
+                // Sync specific rule change
+                applyRuleChange(data);
                 break;
             case 'proceed_to_selection':
                 // Received signal to transition from rules to selection
@@ -584,26 +581,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Disable filters for guest in online mode
     function disableFiltersForGuest() {
-        const modeSelect = document.getElementById('mode-select');
-        const regionFilter = document.getElementById('region-filter');
-        const type1Filter = document.getElementById('type1-filter');
-        const type2Filter = document.getElementById('type2-filter');
+        // Guest can now change rules, so do nothing here.
+        // We might want to just log or ensure things are enabled.
+        const elements = ['mode-select', 'region-filter', 'type1-filter', 'type2-filter'];
+        elements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = false;
+        });
 
-        if (modeSelect) modeSelect.disabled = true;
-
-        // Mode 'full' or 'omakase' allow filters even for guest
-        const allowFilters = (currentMode === 'full' || currentMode === 'omakase');
-
-        if (regionFilter) regionFilter.disabled = !allowFilters;
-        if (type1Filter) type1Filter.disabled = !allowFilters;
-        if (type2Filter) type2Filter.disabled = !allowFilters;
-
-        // Disable type mode toggles for guest
-        const battleRuleToggle = document.getElementById('battle-rule-toggle');
-        const constraintToggle = document.getElementById('constraint-toggle');
-        if (battleRuleToggle) battleRuleToggle.disabled = true;
-        if (constraintToggle) constraintToggle.disabled = true;
+        // Also ensure buttons are enabled
+        document.querySelectorAll('.segment-btn').forEach(btn => btn.disabled = false);
     }
+
+
 
     // Enable filters (for host or local mode)
     function enableFilters() {
@@ -659,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (isOnlineMode) {
-            instructionText.textContent = isHost ? 'ルールをきめよう！' : 'あいてがルールをきめています...';
+            instructionText.textContent = 'あいてとルールをきめよう！';
             if (!isHost) {
                 disableRuleSettingForGuest();
             } else {
@@ -672,36 +662,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Disable rule setting for guest
+    // Disable rule setting for guest -> Now ENABLES it
     function disableRuleSettingForGuest() {
-        const elements = [
-            'mode-select', 'start-selection-btn'
-        ];
-        elements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.disabled = true;
-        });
-
-        // Disable buttons in segmented controls
-        document.querySelectorAll('.segment-btn').forEach(btn => btn.disabled = true);
-
-        // Disable rule checkbox containers and bulk buttons
-        const containers = ['rule-region-checkboxes', 'rule-type-checkboxes'];
-        containers.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.querySelectorAll('input').forEach(cb => cb.disabled = true);
-            }
-        });
-        document.querySelectorAll('.bulk-btn').forEach(btn => {
-            btn.disabled = true;
-        });
-
-        // Search filters should still be usable by guests to help them find Pokemon
-        const filters = ['region-filter', 'type1-filter', 'type2-filter'];
-        filters.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.disabled = false;
-        });
+        // We now allow guests to change rules.
+        enableRuleSetting();
     }
 
     // Enable rule setting
@@ -731,23 +695,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Apply rule change from host
+    // Apply rule change from peer
     function applyRuleChange(data) {
         if (data.mode !== undefined) {
             document.getElementById('mode-select').value = data.mode;
-            handleModeChange({ target: { value: data.mode } });
+            handleModeChange({ target: { value: data.mode }, fromPeer: true });
         }
         if (data.region !== undefined) {
             document.getElementById('region-filter').value = data.region;
-            handleRegionChange({ target: { value: data.region } });
+            handleRegionChange({ target: { value: data.region }, fromPeer: true });
         }
         if (data.type1 !== undefined) {
             document.getElementById('type1-filter').value = data.type1;
-            handleType1Change({ target: { value: data.type1 } });
+            handleType1Change({ target: { value: data.type1 }, fromPeer: true });
         }
         if (data.type2 !== undefined) {
             document.getElementById('type2-filter').value = data.type2;
-            handleType2Change({ target: { value: data.type2 } });
+            handleType2Change({ target: { value: data.type2 }, fromPeer: true });
         }
         if (data.battleRule !== undefined) {
             applyBattleRuleChange(data.battleRule === 'double');
@@ -867,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Apply settings change from host (real-time sync)
+    // Apply settings change from peer (real-time sync)
     function applySettingsChange(data) {
         const modeSelect = document.getElementById('mode-select');
         const regionFilter = document.getElementById('region-filter');
@@ -876,20 +840,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.mode && modeSelect) {
             modeSelect.value = data.mode;
-            // Trigger change event to update UI
-            modeSelect.dispatchEvent(new Event('change'));
+            handleModeChange({ target: { value: data.mode }, fromPeer: true });
         }
         if (data.region && regionFilter) {
             regionFilter.value = data.region;
-            regionFilter.dispatchEvent(new Event('change'));
+            handleRegionChange({ target: { value: data.region }, fromPeer: true });
         }
         if (data.type1 && type1Filter) {
             type1Filter.value = data.type1;
-            type1Filter.dispatchEvent(new Event('change'));
+            handleType1Change({ target: { value: data.type1 }, fromPeer: true });
         }
         if (data.type2 && type2Filter) {
             type2Filter.value = data.type2;
-            type2Filter.dispatchEvent(new Event('change'));
+            handleType2Change({ target: { value: data.type2 }, fromPeer: true });
         }
 
         // Sync type mode rules
@@ -933,9 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Send settings change to guest (called by host)
+    // Send settings change to peer (called by host or guest)
     function sendSettingsChange(settingType, value) {
-        if (isOnlineMode && isHost && conn) {
+        if (isOnlineMode && conn) {
             const data = { type: 'rule_changed' };
             data[settingType] = value;
             conn.send(data);
@@ -2572,7 +2535,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#battle-rule-buttons .segment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const isDouble = (btn.dataset.value === 'double');
-                // Online: Send settings to guest
+                // Online: Send settings to peer
                 sendSettingsChange('battleRule', isDouble ? 'double' : 'single');
                 applyBattleRuleChange(isDouble);
             });
@@ -2582,7 +2545,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#constraint-buttons .segment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const isRequired = (btn.dataset.value === 'true');
-                // Online: Send settings to guest
+                // Online: Send settings to peer
                 sendSettingsChange('constraint', isRequired);
                 applyConstraintChange(isRequired);
             });
@@ -2660,7 +2623,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 showSelectionScreen();
-                if (isOnlineMode && isHost && conn) {
+                if (isOnlineMode && conn) {
                     conn.send({ type: 'proceed_to_selection' });
                 }
             });
@@ -2696,9 +2659,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleModeChange(e) {
         const mode = e.target.value;
+        const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
 
-        // Online: Send settings to guest
-        sendSettingsChange('mode', mode);
+        // Online: Send settings to peer if change didn't come from peer
+        if (!fromPeer) {
+            sendSettingsChange('mode', mode);
+        }
 
         currentMode = mode;
         isOmakaseMode = (mode === 'omakase');
@@ -2783,6 +2749,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function handleRegionChange(e) {
         currentRegionFilter = e.target.value;
+        const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
+
+        if (!fromPeer) {
+            sendSettingsChange('region', currentRegionFilter);
+        }
+
         pokemonSearchInput.value = '';
         applyAllFilters();
     }
@@ -3070,6 +3042,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Confirm player 2 selection and start battle (Local mode)
             player2Name = player2NameInput.value.trim() || 'トレーナー 2';
             startTypeBattle(player1Pokemon, pokemon);
+        } else {
+            alert('タイプをえらんでください！');
         }
     }
 
@@ -3135,12 +3109,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleType1Change(e) {
         currentType1Filter = e.target.value;
+        const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
+
+        if (!fromPeer) {
+            sendSettingsChange('type1', currentType1Filter);
+        }
+
         pokemonSearchInput.value = '';
         applyAllFilters();
     }
 
     function handleType2Change(e) {
         currentType2Filter = e.target.value;
+        const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
+
+        if (!fromPeer) {
+            sendSettingsChange('type2', currentType2Filter);
+        }
+
         pokemonSearchInput.value = '';
         applyAllFilters();
     }
