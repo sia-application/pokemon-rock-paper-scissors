@@ -179,13 +179,19 @@ main {
 }
 
 .screen.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
     opacity: 1;
 }
 
 /* Specifically pull up the selection screen to keep the button high */
 #selection-screen.active {
     margin-top: -85px;
+}
+
+.search-settings-container {
+    margin-top: 10px;
+    padding-bottom: 15px;
 }
 
 @media (max-width: 600px) {
@@ -1790,7 +1796,8 @@ body.omakase-active .card-close-btn {
 
 /* Rule Setting Screen Styling */
 .rule-setting-container {
-    max-width: 600px;
+    width: 100%;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -2141,12 +2148,13 @@ body.omakase-active .card-close-btn {
     color: #333;
 }
 
+#back-to-rules-btn {
+    align-self: flex-start;
+    margin-bottom: 20px;
+}
+
 @media (max-width: 600px) {
     .type-filter-selects {
         grid-template-columns: 1fr;
     }
-}
-
-.toggle-search-btn:not(.collapsed) #toggle-icon {
-    transform: rotate(180deg);
 }

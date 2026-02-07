@@ -84,7 +84,7 @@
             <!-- Rule Setting Screen -->
             <div id="rule-setting-screen" class="screen hidden">
                 <div class="rule-setting-container">
-                    <div style="max-width: 500px; margin: 0 auto; text-align: left; margin-bottom: 20px;">
+                    <div style="margin-bottom: 20px; text-align: left;">
                         <button id="back-to-mode-from-rules-btn" class="back-btn">← もどる</button>
                     </div>
 
@@ -230,24 +230,20 @@
 
             <!-- Pokemon Selection Grid -->
             <div id="selection-screen" class="screen hidden">
-                <div class="search-toggle-header">
-                    <button id="back-to-rules-btn" class="back-btn-small">← ルールをかえる</button>
-                    <button id="toggle-search-btn" class="toggle-search-btn collapsed" onclick="toggleSearchSettings()">
-                        <span>条件（じょうけん）で さがす</span>
-                        <span id="toggle-icon">▼</span>
-                    </button>
-                </div>
-                <div id="search-settings-container" class="search-settings-container collapsed">
-                    <div class="name-inputs">
-                        <div class="name-input-group" id="player1-name-group">
-                            <label for="player1-name">トレーナー 1</label>
-                            <input type="text" id="player1-name" placeholder="おなまえ" maxlength="10">
-                        </div>
-                        <div class="name-input-group hidden" id="player2-name-group">
-                            <label for="player2-name">トレーナー 2</label>
-                            <input type="text" id="player2-name" placeholder="おなまえ" maxlength="10">
-                        </div>
+                <button id="back-to-rules-btn" class="back-btn-small">← ルールをかえる</button>
+
+                <div class="name-inputs">
+                    <div class="name-input-group" id="player1-name-group">
+                        <label for="player1-name">トレーナー 1</label>
+                        <input type="text" id="player1-name" placeholder="おなまえ" maxlength="10">
                     </div>
+                    <div class="name-input-group hidden" id="player2-name-group">
+                        <label for="player2-name">トレーナー 2</label>
+                        <input type="text" id="player2-name" placeholder="おなまえ" maxlength="10">
+                    </div>
+                </div>
+
+                <div id="search-settings-container" class="search-settings-container">
                     <div class="pokemon-search-container">
                         <div class="filter-controls">
                             <select id="region-filter">
