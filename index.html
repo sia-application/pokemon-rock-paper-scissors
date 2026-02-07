@@ -204,20 +204,20 @@
                                     <span class="rule-name">バトルのタイプ数</span>
                                     <span class="rule-desc" id="battle-rule-desc">1つか2つのタイプでたたかいます</span>
                                 </div>
-                                <label class="switch">
-                                    <input type="checkbox" id="battle-rule-toggle" checked>
-                                    <span class="slider round"></span>
-                                </label>
+                                <div class="segmented-control" id="battle-rule-buttons">
+                                    <button type="button" class="segment-btn" data-value="single">1タイプ</button>
+                                    <button type="button" class="segment-btn active" data-value="double">2タイプ</button>
+                                </div>
                             </div>
                             <div class="type-rule-item" id="constraint-selector-wrapper">
                                 <div class="rule-info">
                                     <span class="rule-name">せんたくルール</span>
                                     <span class="rule-desc" id="constraint-desc">1タイプだけでもOK</span>
                                 </div>
-                                <label class="switch">
-                                    <input type="checkbox" id="constraint-toggle">
-                                    <span class="slider round"></span>
-                                </label>
+                                <div class="segmented-control" id="constraint-buttons">
+                                    <button type="button" class="segment-btn active" data-value="false">1つでもOK</button>
+                                    <button type="button" class="segment-btn" data-value="true">2つ必須</button>
+                                </div>
                             </div>
                         </div>
                     </div>

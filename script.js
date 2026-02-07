@@ -654,12 +654,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Disable rule setting for guest
     function disableRuleSettingForGuest() {
         const elements = [
-            'mode-select', 'battle-rule-toggle', 'constraint-toggle', 'start-selection-btn'
+            'mode-select', 'start-selection-btn'
         ];
         elements.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.disabled = true;
         });
+
+        // Disable buttons in segmented controls
+        document.querySelectorAll('.segment-btn').forEach(btn => btn.disabled = true);
 
         // Disable rule checkbox containers and bulk buttons
         const containers = ['rule-region-checkboxes', 'rule-type-checkboxes'];
@@ -685,12 +688,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function enableRuleSetting() {
         const elements = [
             'mode-select', 'region-filter', 'type1-filter', 'type2-filter',
-            'battle-rule-toggle', 'constraint-toggle', 'start-selection-btn'
+            'start-selection-btn'
         ];
         elements.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.disabled = false;
         });
+
+        // Enable buttons in segmented controls
+        document.querySelectorAll('.segment-btn').forEach(btn => btn.disabled = false);
 
         // Enable rule checkbox containers and bulk buttons
         const containers = ['rule-region-checkboxes', 'rule-type-checkboxes'];
@@ -724,19 +730,10 @@ document.addEventListener('DOMContentLoaded', () => {
             handleType2Change({ target: { value: data.type2 } });
         }
         if (data.battleRule !== undefined) {
-            const toggle = document.getElementById('battle-rule-toggle');
-            if (toggle) {
-                toggle.checked = (data.battleRule === 'double');
-                applyBattleRuleChange(toggle.checked);
-            }
+            applyBattleRuleChange(data.battleRule === 'double');
         }
         if (data.constraint !== undefined) {
-            const toggle = document.getElementById('constraint-toggle');
-            if (toggle) {
-                toggle.checked = data.constraint;
-                isDoubleTypeRequired = data.constraint;
-                if (window.updateToggleLabels) window.updateToggleLabels('constraint-toggle');
-            }
+            applyConstraintChange(data.constraint === true || data.constraint === 'true');
         }
         syncSelectionFiltersWithRules();
     }
@@ -2549,14 +2546,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Unified random button
         document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
 
-        // Battle Rule Change (Toggle)
-        // Battle Rule Change (Toggle)
-        document.getElementById('battle-rule-toggle').addEventListener('change', handleBattleRuleChange);
-        document.getElementById('constraint-toggle').addEventListener('change', (e) => {
-            isDoubleTypeRequired = e.target.checked;
-            updateToggleLabels('constraint-toggle');
-            // Online: Send settings to guest
-            sendSettingsChange('constraint', e.target.checked);
+        // Battle Rule Buttons (1タイプ / 2タイプ)
+        document.querySelectorAll('#battle-rule-buttons .segment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const isDouble = (btn.dataset.value === 'double');
+                // Online: Send settings to guest
+                sendSettingsChange('battleRule', isDouble ? 'double' : 'single');
+                applyBattleRuleChange(isDouble);
+            });
+        });
+
+        // Constraint Buttons (1つでもOK / 2つ必須)
+        document.querySelectorAll('#constraint-buttons .segment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const isRequired = (btn.dataset.value === 'true');
+                // Online: Send settings to guest
+                sendSettingsChange('constraint', isRequired);
+                applyConstraintChange(isRequired);
+            });
         });
 
         const cancelSelectionBtn = document.getElementById('cancel-selection-btn');
@@ -2640,15 +2647,21 @@ document.addEventListener('DOMContentLoaded', () => {
         clearSelection();
         selectedPokemon = null;
         player1SelectedTypes = [];
-        document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
+        // --- Rule Setting Screen UI Updates ---
+        const regionAccordion = document.getElementById('region-accordion-group');
+        const typeModeSettings = document.getElementById('type-mode-settings');
 
         if (mode === 'type') {
-            // Type Mode: Show type grid, hide pokemon grid and filters
-            pokemonGrid.classList.add('hidden');
-            typeGrid.classList.remove('hidden');
+            // Type Mode Rules: Hide region selection, show type rules
+            if (regionAccordion) regionAccordion.classList.add('hidden');
+            if (typeModeSettings) typeModeSettings.classList.remove('hidden');
+
+            // Type Mode Selection: Show type grid, hide pokemon grid and filters
+            if (pokemonGrid) pokemonGrid.classList.add('hidden');
+            if (typeGrid) typeGrid.classList.remove('hidden');
             filterElements.forEach(el => el.style.display = 'none');
             document.body.classList.remove('omakase-active');
-            pokemonGrid.classList.remove('disabled');
+            if (pokemonGrid) pokemonGrid.classList.remove('disabled');
 
             // Online Type Mode: Show only relevant name input
             if (isOnlineMode) {
@@ -2661,31 +2674,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else {
-            // Full or Omakase Mode: Show pokemon grid, hide type grid
-            pokemonGrid.classList.remove('hidden');
-            typeGrid.classList.add('hidden');
+            // Full or Omakase Mode: Reset Rule Settings UI
+            if (regionAccordion) regionAccordion.classList.remove('hidden');
+            if (typeModeSettings) typeModeSettings.classList.add('hidden');
+
+            // Selection screen updates
+            if (pokemonGrid) pokemonGrid.classList.remove('hidden');
+            if (typeGrid) typeGrid.classList.add('hidden');
             filterElements.forEach(el => el.style.display = '');
 
             if (isOmakaseMode) {
                 document.body.classList.add('omakase-active');
-                pokemonGrid.classList.add('disabled');
-                pokemonSearchInput.disabled = true;
-                pokemonSearchInput.placeholder = 'おまかせモードはけんさくできません';
+                if (pokemonGrid) pokemonGrid.classList.add('disabled');
+                if (pokemonSearchInput) {
+                    pokemonSearchInput.disabled = true;
+                    pokemonSearchInput.placeholder = 'おまかせモードはけんさくできません';
+                }
 
                 // Allow region/type filters in Omakase mode for everyone
-                document.getElementById('region-filter').disabled = false;
-                document.getElementById('type1-filter').disabled = false;
-                document.getElementById('type2-filter').disabled = false;
+                const regF = document.getElementById('region-filter');
+                const t1F = document.getElementById('type1-filter');
+                const t2F = document.getElementById('type2-filter');
+                if (regF) regF.disabled = false;
+                if (t1F) t1F.disabled = false;
+                if (t2F) t2F.disabled = false;
             } else {
                 document.body.classList.remove('omakase-active');
-                pokemonGrid.classList.remove('disabled');
-                pokemonSearchInput.disabled = false;
-                pokemonSearchInput.placeholder = 'ポケモンのなまえでけんさく';
+                if (pokemonGrid) pokemonGrid.classList.remove('disabled');
+                if (pokemonSearchInput) {
+                    pokemonSearchInput.disabled = false;
+                    pokemonSearchInput.placeholder = 'ポケモンのなまえでけんさく';
+                }
 
                 // Enable region/type filters for everyone in Full mode
-                document.getElementById('region-filter').disabled = false;
-                document.getElementById('type1-filter').disabled = false;
-                document.getElementById('type2-filter').disabled = false;
+                const regF = document.getElementById('region-filter');
+                const t1F = document.getElementById('type1-filter');
+                const t2F = document.getElementById('type2-filter');
+                if (regF) regF.disabled = false;
+                if (t1F) t1F.disabled = false;
+                if (t2F) t2F.disabled = false;
             }
         }
         updateInstruction();
@@ -2709,26 +2736,55 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyBattleRuleChange(isDouble) {
         typeBattleMode = isDouble ? 'double' : 'single';
 
-        // Update label styles
-        if (window.updateToggleLabels) window.updateToggleLabels('battle-rule-toggle');
+        // Update button active states
+        document.querySelectorAll('#battle-rule-buttons .segment-btn').forEach(btn => {
+            if ((btn.dataset.value === 'double' && isDouble) || (btn.dataset.value === 'single' && !isDouble)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
 
-        // Show/Hide Constraint Toggle with flex display
-        const constraintSelector = document.getElementById('constraint-selector');
+        // Show/Hide Constraint Selector with flex display
+        const constraintSelector = document.getElementById('constraint-selector-wrapper');
+        const desc = document.getElementById('battle-rule-desc');
         if (typeBattleMode === 'double') {
-            constraintSelector.classList.remove('hidden');
-            constraintSelector.style.display = 'flex'; // Ensure flex display is restored
+            if (constraintSelector) {
+                constraintSelector.classList.remove('hidden');
+                constraintSelector.style.display = 'flex';
+            }
+            if (desc) desc.textContent = '2つのタイプをえらんでたたかいます';
         } else {
-            constraintSelector.classList.add('hidden');
-            constraintSelector.style.display = 'none'; // Force hide
+            if (constraintSelector) {
+                constraintSelector.classList.add('hidden');
+                constraintSelector.style.display = 'none';
+            }
+            if (desc) desc.textContent = '1つのタイプをえらんでたたかいます';
         }
 
         // Reset selections on rules change
         player1SelectedTypes = [];
         player2SelectedTypes = [];
-
         document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('selected'));
-
         updateInstruction();
+    }
+
+    function applyConstraintChange(isRequired) {
+        isDoubleTypeRequired = isRequired;
+
+        // Update button active states
+        document.querySelectorAll('#constraint-buttons .segment-btn').forEach(btn => {
+            if ((btn.dataset.value === 'true' && isRequired) || (btn.dataset.value === 'false' && !isRequired)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        const desc = document.getElementById('constraint-desc');
+        if (desc) {
+            desc.textContent = isRequired ? '2つえらばないとすすめません' : '1タイプだけでもOK';
+        }
     }
 
     function handleTypeButtonClick(e) {
@@ -3877,11 +3933,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggleFilters(disabled) {
-        const ids = ['mode-select', 'region-filter', 'type1-filter', 'type2-filter', 'battle-rule-toggle', 'constraint-toggle'];
+        const ids = ['mode-select', 'region-filter', 'type1-filter', 'type2-filter'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.disabled = disabled;
         });
+        document.querySelectorAll('.segment-btn').forEach(btn => btn.disabled = disabled);
     }
 
     updateInstruction();
