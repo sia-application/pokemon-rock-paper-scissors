@@ -2762,6 +2762,17 @@ document.addEventListener('DOMContentLoaded', () => {
             sendSettingsChange('mode', mode);
         }
 
+        const modeHint = document.getElementById('mode-hint');
+        if (modeHint) {
+            if (mode === 'full') {
+                modeHint.textContent = 'すべてのポケモンからじゆうにえらべます';
+            } else if (mode === 'omakase') {
+                modeHint.textContent = 'ランダムに選ばれた5体からえらびます';
+            } else if (mode === 'type') {
+                modeHint.textContent = 'タイプを選んで、それを持つポケモンでバトルします';
+            }
+        }
+
         currentMode = mode;
         isOmakaseMode = (mode === 'omakase');
         const pokemonGrid = document.getElementById('pokemon-grid');
@@ -3344,15 +3355,48 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const matches = pokemonData.filter(pokemon =>
-            pokemon.name.toLowerCase().includes(query)
-        );
+        // DEBUG LOGS
+        console.log('Search Query:', query);
+        console.log('Active Rule Regions:', ruleRegions);
+        console.log('Active Rule Types:', ruleTypes);
+
+        const matches = pokemonData.filter(pokemon => {
+            const matchesName = pokemon.name.toLowerCase().includes(query);
+
+            // Check region rule
+            const region = getRegionFromId(pokemon.id);
+            const matchesRegion = ruleRegions.includes(region);
+
+            // Check type rule (at least one type must be allowed)
+            const hasValidType = pokemon.types.some(t => ruleTypes.includes(t));
+
+            return matchesName && matchesRegion && hasValidType;
+        });
 
         if (matches.length > 0) {
             showSuggestions(matches);
         } else {
             hideSuggestions();
         }
+    }
+
+    function getRegionFromId(id) {
+        // Handle Mega Evolutions and Regional Forms (often 10xxx)
+        // If ID > 10000, it's a form. We should map it to base form ID or region.
+        // For simplicity, let's treat them as "unknown" or map to base.
+        // We don't have base ID mapping easily here without lookup.
+        // Let's allow them if 'unknown' is checked OR map them to their generation if possible.
+        // Most 10xxx IDs are Gen 6 (Mega), Gen 7 (Alola form), Gen 8 (Galar form), Gen 9 (Paldea form).
+        // It's complex to map perfectly without data.
+        // Let's iterate ranges for standard IDs.
+
+        if (id > 10000) return 'unknown';
+
+        for (const [key, range] of Object.entries(GENERATION_RANGES)) {
+            if (key === 'all') continue;
+            if (id >= range.min && id <= range.max) return key;
+        }
+        return 'unknown';
     }
 
     function showSuggestions(matches) {
