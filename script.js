@@ -174,8 +174,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 applySettingsChange(data);
                 break;
             case 'rule_changed':
-                // Sync specific rule change
-                applyRuleChange(data);
+                if (data.type === 'rule_changed') {
+                    applyRuleChange(data);
+                }
+                break;
+            case 'back_to_rules':
+                showRuleSettingScreen();
+                // Reset local state if needed
+                clearSelection();
+                player1Pokemon = null;
+                myPokemonSelected = null;
+                opponentPokemonSelected = null;
+                updateInstruction();
                 break;
             case 'proceed_to_selection':
                 // Received signal to transition from rules to selection
@@ -586,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Disable filters for guest in online mode
     function disableFiltersForGuest() {
-        // Guest can now change rules, so do nothing here.
+        // We now allow guests to change rules, so do nothing here.
         // We might want to just log or ensure things are enabled.
         const elements = ['mode-select', 'region-filter', 'type1-filter', 'type2-filter'];
         elements.forEach(id => {
@@ -723,6 +733,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (data.constraint !== undefined) {
             applyConstraintChange(data.constraint === true || data.constraint === 'true');
+        }
+        if (data.calcMethod !== undefined) {
+            applyCalcMethodChange(data.calcMethod);
         }
 
         if (data.ruleRegions !== undefined) {
@@ -906,6 +919,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settings.constraint !== undefined) {
             applyConstraintChange(settings.constraint);
         }
+        if (settings.calcMethod !== undefined) {
+            applyCalcMethodChange(settings.calcMethod);
+        }
 
         syncSelectionFiltersWithRules();
     }
@@ -922,7 +938,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ruleRegions: ruleRegions,
             ruleTypes: ruleTypes,
             battleRule: typeBattleMode,
-            constraint: isDoubleTypeRequired
+            constraint: isDoubleTypeRequired,
+            calcMethod: damageCalculationMethod
         };
         conn.send({ type: 'game_settings', settings: settings });
     }
@@ -2419,6 +2436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1SelectedTypes = []; // For Type Mode
     let player2SelectedTypes = []; // For Type Mode
     let isDoubleTypeRequired = false; // Toggle state
+    let damageCalculationMethod = 'multiply'; // 'multiply' or 'add'
     let actionTimeout = null;
 
     const GENERATION_RANGES = {
@@ -2622,30 +2640,67 @@ document.addEventListener('DOMContentLoaded', () => {
         // Expose to window for external calls if needed (like from applyBattleRuleChange)
         window.updateToggleLabels = updateToggleLabels;
 
+        // Segmented Control Setup Helper
+        const setupSegmentedControl = (containerId, callback, defaultValue) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const buttons = container.querySelectorAll('.segment-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = btn.dataset.value;
+
+                    // Update UI
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Call handler
+                    if (callback) callback(value);
+                });
+            });
+
+            // Set initial state if needed
+            // (Assuming HTML has 'active' class on default, or we force it here)
+        };
+
+        // Helper to update segmented control UI from external change (e.g. Peer)
+        const updateSegmentedControlState = (containerId, value) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const buttons = container.querySelectorAll('.segment-btn');
+            buttons.forEach(btn => {
+                if (btn.dataset.value === value) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        };
+        window.updateSegmentedControlState = updateSegmentedControlState;
+
 
         // Unified random button
         document.getElementById('random-type-btn').addEventListener('click', handleRandomTypeClick);
 
         // Battle Rule Buttons (1タイプ / 2タイプ)
-        // Battle Rule Buttons (1タイプ / 2タイプ)
-        document.querySelectorAll('#battle-rule-buttons .segment-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const isDouble = (btn.dataset.value === 'double');
-                // Online: Send settings to peer
-                sendSettingsChange('battleRule', isDouble ? 'double' : 'single');
-                applyBattleRuleChange(isDouble);
-            });
-        });
+        setupSegmentedControl('battle-rule-buttons', (value) => {
+            applyBattleRuleChange(value === 'double');
+            // Online sync
+            sendSettingsChange('battleRule', value);
+        }, 'double'); // Default 'double'
 
-        // Constraint Buttons (1つでもOK / 2つ必須)
-        document.querySelectorAll('#constraint-buttons .segment-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const isRequired = (btn.dataset.value === 'true');
-                // Online: Send settings to peer
-                sendSettingsChange('constraint', isRequired);
-                applyConstraintChange(isRequired);
-            });
-        });
+        setupSegmentedControl('constraint-buttons', (value) => {
+            const isRequired = (value === 'true');
+            applyConstraintChange(isRequired);
+            // Online sync
+            sendSettingsChange('constraint', isRequired);
+        }, 'false'); // Default 'false'
+
+        setupSegmentedControl('calc-method-buttons', (value) => {
+            applyCalcMethodChange(value);
+            // Online sync
+            sendSettingsChange('calcMethod', value);
+        }, 'multiply'); // Default 'multiply'
 
         const cancelSelectionBtn = document.getElementById('cancel-selection-btn');
         if (cancelSelectionBtn) {
@@ -2725,24 +2780,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-
         const backToRulesBtn = document.getElementById('back-to-rules-btn');
         if (backToRulesBtn) {
             backToRulesBtn.addEventListener('click', () => {
                 if (isOnlineMode) {
                     if (confirm('ルール設定に戻りますか？現在の選択はリセットされます。')) {
-                        // Online back to rules not fully sync-friendly yet but let's allow it for host
-                        if (isHost) {
-                            showRuleSettingScreen();
-                            // Reset selections
-                            clearSelection();
-                            player1Pokemon = null;
-                            myPokemonSelected = null;
-                            opponentPokemonSelected = null;
-                            // Optionally notify guest but it might be complex
-                        } else {
-                            alert('ホストのみがルール設定に戻れます。');
+                        // Send message to peer (Host or Guest)
+                        if (conn) {
+                            conn.send({ type: 'back_to_rules' });
                         }
+
+                        showRuleSettingScreen();
+                        // Reset selections
+                        clearSelection();
+                        player1Pokemon = null;
+                        myPokemonSelected = null;
+                        opponentPokemonSelected = null;
+                        updateInstruction();
                     }
                 } else {
                     showRuleSettingScreen();
@@ -2765,11 +2819,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const modeHint = document.getElementById('mode-hint');
         if (modeHint) {
             if (mode === 'full') {
-                modeHint.textContent = 'すべてのポケモンからじゆうにえらべます';
+                modeHint.textContent = 'すべてのポケモンからじゆうにえらんでバトル';
             } else if (mode === 'omakase') {
-                modeHint.textContent = 'ランダムに選ばれた5体からえらびます';
+                modeHint.textContent = 'ランダムにえらばれた1体でバトル';
             } else if (mode === 'type') {
-                modeHint.textContent = 'タイプを選んで、それを持つポケモンでバトルします';
+                modeHint.textContent = 'タイプをえらんでバトル';
             }
         }
 
@@ -2921,22 +2975,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyConstraintChange(isRequired) {
         isDoubleTypeRequired = isRequired;
-
-        // Update button active states
-        document.querySelectorAll('#constraint-buttons .segment-btn').forEach(btn => {
-            if ((btn.dataset.value === 'true' && isRequired) || (btn.dataset.value === 'false' && !isRequired)) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-
         const desc = document.getElementById('constraint-desc');
         if (desc) {
-            desc.textContent = isRequired ? '2つえらばないとすすめません' : '1タイプだけでもOK';
+            desc.textContent = isRequired ? '2タイプともルールに合わないとダメ' : '1タイプだけでもOK';
         }
+        updateSegmentedControlState('constraint-buttons', isRequired.toString());
     }
 
+    function applyCalcMethodChange(method) {
+        damageCalculationMethod = method;
+        const desc = document.getElementById('calc-method-desc');
+        if (desc) {
+            desc.textContent = (method === 'multiply') ? 'こうかを かけ算 します' : 'こうかを たし算 します';
+        }
+        updateSegmentedControlState('calc-method-buttons', method);
+    }
     function handleTypeButtonClick(e) {
         const btn = e.target;
         const type = btn.dataset.type;
@@ -3946,35 +3999,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateEffectiveness(attackerTypes, defenderTypes) {
+        const isAddMode = (damageCalculationMethod === 'add');
+
         // Calculate total multiplier for attacker vs defender
-        let attackerMultiplier = 1;
+        let attackerTotal = isAddMode ? 0 : 1;
         const attackerProcess = [];
+
+        // Matchups count for loop
+        let matchCount = 0;
+
         for (const atkType of attackerTypes) {
             const relationships = typeChart[atkType] || {};
             for (const defType of defenderTypes) {
                 const mult = relationships[defType] !== undefined ? relationships[defType] : 1;
-                attackerMultiplier *= mult;
+
+                if (isAddMode) {
+                    attackerTotal += mult;
+                } else {
+                    attackerTotal *= mult;
+                }
+                matchCount++;
                 attackerProcess.push(`${translateType(atkType)} → ${translateType(defType)} (×${mult})`);
             }
         }
 
+        // For addition mode, if there are multiple matchups (e.g. dual types),
+        // we might want to normalize or just sum?
+        // User spec: 
+        // x2 + x2 = x4 (Matches x2 * x2 = x4)
+        // x2 + x0.5 = x2.5 (vs x1)
+        // x0 + x2 = x2 (vs x0)
+        // This implies simple sum of all individual effectiveness numbers.
+        // Base should start at 0.
+        // If single type vs single type: start 0, add mult. Correct.
+
         // Calculate total multiplier for defender vs attacker
-        let defenderMultiplier = 1;
+        let defenderTotal = isAddMode ? 0 : 1;
         const defenderProcess = [];
+
         for (const defType of defenderTypes) {
             const relationships = typeChart[defType] || {};
             for (const atkType of attackerTypes) {
                 const mult = relationships[atkType] !== undefined ? relationships[atkType] : 1;
-                defenderMultiplier *= mult;
+
+                if (isAddMode) {
+                    defenderTotal += mult;
+                } else {
+                    defenderTotal *= mult;
+                }
                 defenderProcess.push(`${translateType(defType)} → ${translateType(atkType)} (×${mult})`);
             }
         }
 
         // Compare multipliers
         let result;
-        if (attackerMultiplier > defenderMultiplier) {
+        if (attackerTotal > defenderTotal) {
             result = 'win';
-        } else if (attackerMultiplier < defenderMultiplier) {
+        } else if (attackerTotal < defenderTotal) {
             result = 'lose';
         } else {
             result = 'draw';
@@ -3982,8 +4063,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             result,
-            p1Multiplier: attackerMultiplier,
-            p2Multiplier: defenderMultiplier,
+            p1Multiplier: attackerTotal,
+            p2Multiplier: defenderTotal,
             p1Process: attackerProcess,
             p2Process: defenderProcess
         };
