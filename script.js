@@ -439,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showSelectionScreen() {
         window.scrollTo(0, 0);
         syncSelectionFiltersWithRules();
+        applyAllFilters();
 
         // Hide rule setting screen
         const ruleSettingScreen = document.getElementById('rule-setting-screen');
@@ -3111,8 +3112,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Step 2: Apply Personal Sorting (Selection screen filters) ---
         filtered = applyRegionFilter(filtered, currentRegionFilter);
-        filtered = applyTypeFilter(filtered, currentType1Filter, 'type1');
-        filtered = applyTypeFilter(filtered, currentType2Filter, 'type2');
+
+        // Refined Type filtering logic: 
+        // If both type filters are the same (and not 'all'), filter for monotype
+        if (currentType1Filter !== 'all' && currentType1Filter === currentType2Filter) {
+            filtered = filtered.filter(p => p.types.length === 1 && p.types[0] === currentType1Filter);
+        } else {
+            filtered = applyTypeFilter(filtered, currentType1Filter, 'type1');
+            filtered = applyTypeFilter(filtered, currentType2Filter, 'type2');
+        }
 
         currentPokemonList = filtered;
         renderPokemonGrid(currentPokemonList);

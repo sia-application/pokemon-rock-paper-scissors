@@ -767,13 +767,17 @@ body.omakase-active .card-close-btn {
     gap: 10px;
 }
 
-.type-filters-wrapper select {
-    flex: 1;
-}
-
 @media (min-width: 600px) {
     .filter-controls {
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        align-items: center;
+    }
+
+    .type-filters-wrapper {
+        display: contents;
+        /* Allows selects to be direct grid items of .filter-controls */
     }
 }
 
