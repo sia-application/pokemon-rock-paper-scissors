@@ -743,6 +743,34 @@ body.omakase-active .card-close-btn {
     box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
 }
 
+.pokemon-search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.type-filters-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.type-filters-wrapper select {
+    flex: 1;
+}
+
+@media (min-width: 600px) {
+    .filter-controls {
+        flex-direction: row;
+    }
+}
+
 .pokemon-search-container input {
     font-family: var(--font-main);
     font-size: 1rem;
@@ -1760,64 +1788,363 @@ body.omakase-active .card-close-btn {
     margin: 0 !important;
 }
 
-/* Search Settings Toggle */
-.search-toggle-header {
-    display: flex;
-    justify-content: center;
-    /* Center the button */
-    margin-bottom: 5px;
-    margin-top: 5px;
-    /* Extra tight symmetric margins */
-    position: relative;
-    z-index: 100;
+/* Rule Setting Screen Styling */
+.rule-setting-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-.toggle-search-btn {
+.rule-setting-container .section-title {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-weight: 800;
+}
+
+.rule-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.rule-card {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 3px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.rule-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #555;
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #fff;
-    border: 3px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 16px;
+}
+
+.rule-card h3::before {
+    content: '⚙️';
+    font-size: 1.2rem;
+}
+
+.rule-card select {
+    width: 100%;
+    padding: 12px 15px;
     font-family: var(--font-main);
+    font-size: 1rem;
     font-weight: bold;
-    color: #555;
+    border: 3px solid #eee;
+    border-radius: 15px;
+    background-color: #f9f9f9;
+    color: #333;
+    outline: none;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.9rem;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.toggle-search-btn:hover {
+.rule-card select:focus {
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    background-color: white;
 }
 
-.toggle-search-btn:active {
+.rule-hint {
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 10px;
+    padding-left: 5px;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #777;
+    margin-bottom: 8px;
+    margin-left: 5px;
+}
+
+.type-filter-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.type-rule-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    border: 2px solid #eee;
+}
+
+.type-rule-item:last-child {
+    margin-bottom: 0;
+}
+
+.rule-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rule-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.rule-desc {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Rule Accordion Styles */
+.rule-accordion-group {
+    border-bottom: 2px solid #f0f0f0;
+    overflow: hidden;
+}
+
+.rule-accordion-group:last-child {
+    border-bottom: none;
+}
+
+.rule-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.3s;
+}
+
+.rule-accordion-header:hover {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+.rule-accordion-header .rule-section-label {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.accordion-icon {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.accordion-icon::before,
+.accordion-icon::after {
+    content: '';
+    position: absolute;
+    background: #ccc;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+
+.accordion-icon::before {
+    width: 2px;
+    height: 12px;
+    left: 9px;
+    top: 4px;
+}
+
+.accordion-icon::after {
+    width: 12px;
+    height: 2px;
+    left: 4px;
+    top: 9px;
+}
+
+.rule-accordion-group.open .accordion-icon {
+    transform: rotate(45deg);
+}
+
+.rule-accordion-group.open .accordion-icon::before,
+.rule-accordion-group.open .accordion-icon::after {
+    background: var(--primary-color);
+}
+
+.rule-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s;
+    padding: 0;
+}
+
+.rule-accordion-group.open .rule-accordion-content {
+    max-height: 2000px;
+    /* Large enough to fit content */
+    padding-bottom: 20px;
+}
+
+.rule-checkbox-group {
+    margin-bottom: 0;
+}
+
+.rule-section-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.bulk-btn {
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    background: #fdfdfd;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+}
+
+.rule-accordion-group.open .bulk-btn {
+    display: block;
+}
+
+.bulk-btn:hover {
+    border-color: #bbb;
+    background: #f5f5f5;
+    color: #333;
+}
+
+.bulk-btn:active {
     transform: scale(0.95);
 }
 
-.toggle-search-btn #toggle-icon {
-    display: inline-block;
-    font-size: 0.8rem;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    padding: 5px;
 }
 
-/* Container transition */
-.search-settings-container {
-    overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
-    max-height: 1200px;
-    opacity: 1;
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #444;
+    cursor: pointer;
+    background: white;
+    padding: 8px 12px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    transition: all 0.2s;
+    user-select: none;
+    white-space: nowrap;
 }
 
-.search-settings-container.collapsed {
-    max-height: 0 !important;
-    opacity: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    pointer-events: none;
+.checkbox-item:hover {
+    border-color: #ddd;
+    background: #fdfdfd;
+}
+
+.checkbox-item:has(input:checked) {
+    border-color: var(--primary-color);
+    background: #fff5f5;
+    color: var(--primary-color);
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+@media (max-width: 500px) {
+    .checkbox-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.rule-confirm-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.next-btn {
+    background: linear-gradient(135deg, var(--primary-color), #e53935);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 300px;
+}
+
+.next-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.next-btn:active {
+    transform: translateY(-1px);
+}
+
+.back-btn-small {
+    background: #f0f0f0;
+    color: #666;
+    border: none;
+    border-radius: 15px;
+    padding: 8px 15px;
+    font-family: var(--font-main);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.back-btn-small:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+@media (max-width: 600px) {
+    .type-filter-selects {
+        grid-template-columns: 1fr;
+    }
 }
 
 .toggle-search-btn:not(.collapsed) #toggle-icon {

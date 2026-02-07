@@ -183,6 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     applySettingsChange(data);
                 }
                 break;
+            case 'rule_changed':
+                // Sync specific rule change from host
+                if (!isHost) {
+                    applyRuleChange(data);
+                }
+                break;
+            case 'proceed_to_selection':
+                // Received signal to transition from rules to selection
+                showSelectionScreen();
+                break;
         }
     }
 
@@ -373,19 +383,14 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.textContent = 'せつぞくしました！';
         cancelConnectionBtn.classList.add('hidden');
 
-        // Short delay then go to selection screen
+        // Short delay then go to rule setting screen
         setTimeout(() => {
             // Hide online room screen
             onlineRoomScreen.classList.remove('active');
             onlineRoomScreen.classList.add('hidden');
 
-            // Show selection screen
-            showSelectionScreen();
-
-            // If host, send start signal
-            if (isHost && conn) {
-                conn.send({ type: 'start_selection' });
-            }
+            // Show rule setting screen
+            showRuleSettingScreen();
         }, 1000);
     }
 
@@ -442,6 +447,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show selection screen
     function showSelectionScreen() {
         window.scrollTo(0, 0);
+
+        // Hide rule setting screen
+        const ruleSettingScreen = document.getElementById('rule-setting-screen');
+        if (ruleSettingScreen) {
+            ruleSettingScreen.classList.remove('active');
+            ruleSettingScreen.classList.add('hidden');
+        }
+
         selectionScreen.classList.remove('hidden');
         selectionScreen.classList.add('active');
 
@@ -527,6 +540,130 @@ document.addEventListener('DOMContentLoaded', () => {
         onlineRoomScreen.classList.add('hidden');
         selectionScreen.classList.remove('active');
         selectionScreen.classList.add('hidden');
+
+        const ruleSettingScreen = document.getElementById('rule-setting-screen');
+        if (ruleSettingScreen) {
+            ruleSettingScreen.classList.remove('active');
+            ruleSettingScreen.classList.add('hidden');
+        }
+    }
+
+    // Show rule setting screen
+    function showRuleSettingScreen() {
+        window.scrollTo(0, 0);
+        modeSelectionScreen.classList.remove('active');
+        modeSelectionScreen.classList.add('hidden');
+        onlineRoomScreen.classList.remove('active');
+        onlineRoomScreen.classList.add('hidden');
+        selectionScreen.classList.remove('active');
+        selectionScreen.classList.add('hidden');
+
+        const ruleSettingScreen = document.getElementById('rule-setting-screen');
+        if (ruleSettingScreen) {
+            ruleSettingScreen.classList.remove('hidden');
+            ruleSettingScreen.classList.add('active');
+        }
+
+        if (isOnlineMode) {
+            instructionText.textContent = isHost ? 'ルールをきめよう！' : 'あいてがルールをきめています...';
+            if (!isHost) {
+                disableRuleSettingForGuest();
+            } else {
+                enableRuleSetting();
+            }
+        } else {
+            instructionText.textContent = 'ルールをきめよう！';
+            enableRuleSetting();
+        }
+    }
+
+    // Disable rule setting for guest
+    function disableRuleSettingForGuest() {
+        const elements = [
+            'mode-select', 'battle-rule-toggle', 'constraint-toggle', 'start-selection-btn'
+        ];
+        elements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = true;
+        });
+
+        // Disable rule checkbox containers and bulk buttons
+        const containers = ['rule-region-checkboxes', 'rule-type-checkboxes'];
+        containers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.querySelectorAll('input').forEach(cb => cb.disabled = true);
+            }
+        });
+        document.querySelectorAll('.bulk-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+
+        // Search filters should still be usable by guests to help them find Pokemon
+        const filters = ['region-filter', 'type1-filter', 'type2-filter'];
+        filters.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = false;
+        });
+    }
+
+    // Enable rule setting
+    function enableRuleSetting() {
+        const elements = [
+            'mode-select', 'region-filter', 'type1-filter', 'type2-filter',
+            'battle-rule-toggle', 'constraint-toggle', 'start-selection-btn'
+        ];
+        elements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = false;
+        });
+
+        // Enable rule checkbox containers and bulk buttons
+        const containers = ['rule-region-checkboxes', 'rule-type-checkboxes'];
+        containers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.querySelectorAll('input').forEach(cb => cb.disabled = false);
+            }
+        });
+        document.querySelectorAll('.bulk-btn').forEach(btn => {
+            btn.disabled = false;
+        });
+    }
+
+    // Apply rule change from host
+    function applyRuleChange(data) {
+        if (data.mode !== undefined) {
+            document.getElementById('mode-select').value = data.mode;
+            handleModeChange({ target: { value: data.mode } });
+        }
+        if (data.region !== undefined) {
+            document.getElementById('region-filter').value = data.region;
+            handleRegionChange({ target: { value: data.region } });
+        }
+        if (data.type1 !== undefined) {
+            document.getElementById('type1-filter').value = data.type1;
+            handleType1Change({ target: { value: data.type1 } });
+        }
+        if (data.type2 !== undefined) {
+            document.getElementById('type2-filter').value = data.type2;
+            handleType2Change({ target: { value: data.type2 } });
+        }
+        if (data.battleRule !== undefined) {
+            const toggle = document.getElementById('battle-rule-toggle');
+            if (toggle) {
+                toggle.checked = (data.battleRule === 'double');
+                applyBattleRuleChange(toggle.checked);
+            }
+        }
+        if (data.constraint !== undefined) {
+            const toggle = document.getElementById('constraint-toggle');
+            if (toggle) {
+                toggle.checked = data.constraint;
+                isDoubleTypeRequired = data.constraint;
+                if (window.updateToggleLabels) window.updateToggleLabels('constraint-toggle');
+            }
+        }
     }
 
     // Cancel connection
@@ -680,12 +817,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateToggleLabels('constraint-toggle');
             }
         }
+
+        // Sync mandatory rules
+        if (data.ruleRegions !== undefined) {
+            ruleRegions = data.ruleRegions;
+            const container = document.getElementById('rule-region-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleRegions.includes(cb.value);
+                });
+            }
+        }
+        if (data.ruleTypes !== undefined) {
+            ruleTypes = data.ruleTypes;
+            const container = document.getElementById('rule-type-checkboxes');
+            if (container) {
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.checked = ruleTypes.includes(cb.value);
+                });
+            }
+        }
     }
 
     // Send settings change to guest (called by host)
     function sendSettingsChange(settingType, value) {
         if (isOnlineMode && isHost && conn) {
-            const data = { type: 'settings_change' };
+            const data = { type: 'rule_changed' };
             data[settingType] = value;
             conn.send(data);
         }
@@ -696,11 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localModeBtn.addEventListener('click', () => {
             window.scrollTo(0, 0);
             isOnlineMode = false;
-            modeSelectionScreen.classList.remove('active');
-            modeSelectionScreen.classList.add('hidden');
-            selectionScreen.classList.remove('hidden');
-            selectionScreen.classList.add('active');
-            instructionText.textContent = 'ポケモンをえらぼう！';
+            showRuleSettingScreen();
         });
     }
 
@@ -2106,6 +2259,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentType1Filter = 'all';
     let currentType2Filter = 'all';
     let currentRegionFilter = 'all';
+    let ruleTypes = [];
+    let ruleRegions = [];
     let currentMode = 'full'; // 'full', 'omakase', 'type'
     let typeBattleMode = 'double'; // 'single' or 'double'
     let player1SelectedTypes = []; // For Type Mode
@@ -2166,6 +2321,66 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('type2-filter').addEventListener('change', handleType2Change);
         document.getElementById('mode-select').addEventListener('change', handleModeChange);
 
+        // Multi-select rules (Checkboxes)
+        const setupCheckboxListeners = (containerId, stateVar, syncKey) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const updateState = () => {
+                const selected = Array.from(container.querySelectorAll('input:checked')).map(cb => cb.value);
+                if (containerId === 'rule-region-checkboxes') ruleRegions = selected;
+                else ruleTypes = selected;
+                sendSettingsChange(syncKey, selected);
+            };
+            container.querySelectorAll('input').forEach(cb => {
+                cb.addEventListener('change', updateState);
+            });
+
+            // Bulk toggle buttons
+            document.querySelectorAll(`.toggle-bulk-btn[data-target="${containerId}"]`).forEach(btn => {
+                const updateButtonLabel = () => {
+                    const checkboxes = container.querySelectorAll('input');
+                    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                    btn.textContent = (checkedCount === checkboxes.length) ? '全解除' : '全選択';
+                };
+
+                btn.addEventListener('click', () => {
+                    const checkboxes = container.querySelectorAll('input');
+                    const allSelected = Array.from(checkboxes).every(cb => cb.checked);
+                    checkboxes.forEach(cb => {
+                        cb.checked = !allSelected;
+                    });
+                    updateState();
+                    updateButtonLabel();
+                });
+
+                // Update label on individual checkbox change
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', updateButtonLabel);
+                });
+
+                // Initial label set
+                updateButtonLabel();
+            });
+
+            // Initial state check
+            updateState();
+        };
+        setupCheckboxListeners('rule-region-checkboxes', ruleRegions, 'ruleRegions');
+        setupCheckboxListeners('rule-type-checkboxes', ruleTypes, 'ruleTypes');
+
+        // Accordion Toggle Logic
+        document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                // Don't toggle if a bulk button was clicked
+                if (e.target.closest('.bulk-btn')) return;
+
+                const group = trigger.closest('.rule-accordion-group');
+                if (group) {
+                    group.classList.toggle('open');
+                }
+            });
+        });
+
         // Type button click handlers for Type Mode
         document.querySelectorAll('.type-btn').forEach(btn => {
             btn.addEventListener('click', handleTypeButtonClick);
@@ -2179,11 +2394,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const isChecked = toggle.checked;
 
             if (toggleId === 'battle-rule-toggle') {
-                document.getElementById('label-rule-single').classList.toggle('active', !isChecked);
-                document.getElementById('label-rule-double').classList.toggle('active', isChecked);
+                const labelSingle = document.getElementById('label-rule-single');
+                const labelDouble = document.getElementById('label-rule-double');
+                if (labelSingle) labelSingle.classList.toggle('active', !isChecked);
+                if (labelDouble) labelDouble.classList.toggle('active', isChecked);
             } else if (toggleId === 'constraint-toggle') {
-                document.getElementById('label-constraint-free').classList.toggle('active', !isChecked);
-                document.getElementById('label-constraint-required').classList.toggle('active', isChecked);
+                const labelFree = document.getElementById('label-constraint-free');
+                const labelRequired = document.getElementById('label-constraint-required');
+                if (labelFree) labelFree.classList.toggle('active', !isChecked);
+                if (labelRequired) labelRequired.classList.toggle('active', isChecked);
             }
         };
 
@@ -2227,19 +2446,66 @@ document.addEventListener('DOMContentLoaded', () => {
             sendSettingsChange('constraint', e.target.checked);
         });
 
-        document.getElementById('cancel-selection-btn').addEventListener('click', () => {
-            // ... existing code ...
-            // Only clear tentative selection, not full game reset unless intended
-            // For now, clear current selection.
-            clearSelection();
-            selectedPokemon = null;
-            updateInstruction();
-            // Important: If resetting "Random Card" selection, reset its content too 
-            const randomCard = document.getElementById('random-card');
-            if (randomCard && !randomCard.classList.contains('random-card')) {
-                resetRandomCard(randomCard);
-            }
-        });
+        const cancelSelectionBtn = document.getElementById('cancel-selection-btn');
+        if (cancelSelectionBtn) {
+            cancelSelectionBtn.addEventListener('click', () => {
+                // Only clear tentative selection, not full game reset unless intended
+                // For now, clear current selection.
+                clearSelection();
+                selectedPokemon = null;
+                updateInstruction();
+                // Important: If resetting "Random Card" selection, reset its content too 
+                const randomCard = document.getElementById('random-card');
+                if (randomCard && !randomCard.classList.contains('random-card')) {
+                    resetRandomCard(randomCard);
+                }
+            });
+        }
+
+        // Back to Mode Selection from Rule Setting
+        const backToModeFromRulesBtn = document.getElementById('back-to-mode-from-rules-btn');
+        if (backToModeFromRulesBtn) {
+            backToModeFromRulesBtn.addEventListener('click', () => {
+                cancelConnection();
+                showModeSelectionScreen();
+            });
+        }
+
+        // Start Selection from Rule Setting
+        const startSelectionBtn = document.getElementById('start-selection-btn');
+        if (startSelectionBtn) {
+            startSelectionBtn.addEventListener('click', () => {
+                showSelectionScreen();
+                if (isOnlineMode && isHost && conn) {
+                    conn.send({ type: 'proceed_to_selection' });
+                }
+            });
+        }
+
+        // Back to Rules from Selection
+        const backToRulesBtn = document.getElementById('back-to-rules-btn');
+        if (backToRulesBtn) {
+            backToRulesBtn.addEventListener('click', () => {
+                if (isOnlineMode) {
+                    if (confirm('ルール設定に戻りますか？現在の選択はリセットされます。')) {
+                        // Online back to rules not fully sync-friendly yet but let's allow it for host
+                        if (isHost) {
+                            showRuleSettingScreen();
+                            // Reset selections
+                            clearSelection();
+                            player1Pokemon = null;
+                            myPokemonSelected = null;
+                            opponentPokemonSelected = null;
+                            // Optionally notify guest but it might be complex
+                        } else {
+                            alert('ホストのみがルール設定に戻れます。');
+                        }
+                    }
+                } else {
+                    showRuleSettingScreen();
+                }
+            });
+        }
 
         updateInstruction();
     }
@@ -2255,7 +2521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pokemonGrid = document.getElementById('pokemon-grid');
         const typeGrid = document.getElementById('type-selection-grid');
         const searchContainer = document.querySelector('.pokemon-search-container');
-        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input, .type-filters-wrapper');
+        const filterElements = searchContainer.querySelectorAll('select:not(#mode-select), input, .filter-controls');
 
         // Reset selections
         clearSelection();
@@ -2626,18 +2892,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleType1Change(e) {
-        // Online: Send settings to guest
-        sendSettingsChange('type1', e.target.value);
-
         currentType1Filter = e.target.value;
         pokemonSearchInput.value = '';
         applyAllFilters();
     }
 
     function handleType2Change(e) {
-        // Online: Send settings to guest
-        sendSettingsChange('type2', e.target.value);
-
         currentType2Filter = e.target.value;
         pokemonSearchInput.value = '';
         applyAllFilters();
@@ -2646,51 +2906,101 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyAllFilters() {
         let filtered = pokemonData;
 
-        // Apply region filter
-        const region = currentRegionFilter;
-        const range = GENERATION_RANGES[region];
+        // --- Step 1: Apply Room Rules (Mandatory) ---
+        const applyRegionRule = (list, regions) => {
+            if (regions.length === 0) return [];
+            // If all are checked, it's effectively no filter, but let's filter properly
+            return list.filter(p => {
+                return regions.some(region => {
+                    const range = GENERATION_RANGES[region];
+                    if (!range) return false;
 
-        if (region === 'all') {
-            // No region filter
-        } else if (region === 'gen6') {
-            filtered = filtered.filter(p => ((p.id >= range.min && p.id <= range.max) || (p.name.includes('メガ') && p.name !== 'メガニウム' && p.name !== 'メガヤンマ')) && !p.image.includes('images/'));
-        } else if (region === 'gen6_za') {
-            filtered = filtered.filter(p => p.image.includes('images/'));
-        } else if (region === 'gen7') {
-            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ'));
-        } else if (region === 'gen8') {
-            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル'));
-        } else if (region === 'gen9') {
-            filtered = filtered.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア'));
-        } else if (region === 'hisui') {
-            filtered = filtered.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
-        } else {
-            filtered = filtered.filter(p =>
+                    if (region === 'gen6') {
+                        return ((p.id >= range.min && p.id <= range.max) || (p.name.includes('メガ') && p.name !== 'メガニウム' && p.name !== 'メガヤンマ')) && !p.image.includes('images/');
+                    }
+                    if (region === 'gen6_za') {
+                        return p.image.includes('images/');
+                    }
+                    if (region === 'gen7') {
+                        return (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ');
+                    }
+                    if (region === 'gen8') {
+                        return (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル');
+                    }
+                    if (region === 'gen9') {
+                        return (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア');
+                    }
+                    if (region === 'hisui') {
+                        return (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ');
+                    }
+                    return p.id >= range.min &&
+                        p.id <= range.max &&
+                        !p.name.includes('アローラ') &&
+                        !p.name.includes('ガラル') &&
+                        !p.name.includes('パルデア') &&
+                        !p.name.includes('ヒスイ') &&
+                        (!p.name.includes('メガ') || p.name === 'メガニウム' || p.name === 'メガヤンマ');
+                });
+            });
+        };
+
+        const applyRegionFilter = (list, region) => {
+            const range = GENERATION_RANGES[region];
+            if (region === 'all') return list;
+            // (Re-use existing logic for selection screen filter)
+            if (region === 'gen6') {
+                return list.filter(p => ((p.id >= range.min && p.id <= range.max) || (p.name.includes('メガ') && p.name !== 'メガニウム' && p.name !== 'メガヤンマ')) && !p.image.includes('images/'));
+            }
+            if (region === 'gen6_za') {
+                return list.filter(p => p.image.includes('images/'));
+            }
+            if (region === 'gen7') {
+                return list.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('アローラ'));
+            }
+            if (region === 'gen8') {
+                return list.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('ガラル'));
+            }
+            if (region === 'gen9') {
+                return list.filter(p => (p.id >= range.min && p.id <= range.max) || p.name.includes('パルデア'));
+            }
+            if (region === 'hisui') {
+                return list.filter(p => (p.id >= 899 && p.id <= 905) || p.name.includes('ヒスイ'));
+            }
+            return list.filter(p =>
                 p.id >= range.min &&
                 p.id <= range.max &&
                 !p.name.includes('アローラ') &&
                 !p.name.includes('ガラル') &&
                 !p.name.includes('パルデア') &&
-                !p.name.includes('パルデア') &&
                 !p.name.includes('ヒスイ') &&
                 (!p.name.includes('メガ') || p.name === 'メガニウム' || p.name === 'メガヤンマ')
             );
-        }
+        };
 
-        // Apply type 1 filter
-        if (currentType1Filter !== 'all') {
-            filtered = filtered.filter(p => p.types.includes(currentType1Filter));
-        }
+        const applyTypeRule = (list, types) => {
+            if (types.length === 0) return [];
+            return list.filter(p => {
+                // Return true if any of the pokemon's types are in the allowed list
+                return p.types.some(t => types.includes(t));
+            });
+        };
 
-        // Apply type 2 filter
-        if (currentType2Filter !== 'all') {
-            if (currentType2Filter === 'none') {
-                // Only single-type Pokemon
-                filtered = filtered.filter(p => p.types.length === 1);
-            } else {
-                filtered = filtered.filter(p => p.types.includes(currentType2Filter));
+        const applyTypeFilter = (list, type, role) => {
+            if (type === 'all') return list;
+            if (type === 'none' && role === 'type2') {
+                return list.filter(p => p.types.length === 1);
             }
-        }
+            return list.filter(p => p.types.includes(type));
+        };
+
+        // Apply mandatory room rules
+        filtered = applyRegionRule(filtered, ruleRegions);
+        filtered = applyTypeRule(filtered, ruleTypes);
+
+        // --- Step 2: Apply Personal Sorting (Selection screen filters) ---
+        filtered = applyRegionFilter(filtered, currentRegionFilter);
+        filtered = applyTypeFilter(filtered, currentType1Filter, 'type1');
+        filtered = applyTypeFilter(filtered, currentType2Filter, 'type2');
 
         currentPokemonList = filtered;
         renderPokemonGrid(currentPokemonList);

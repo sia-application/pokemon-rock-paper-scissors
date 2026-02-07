@@ -81,11 +81,159 @@
                     </div>
                 </div>
             </div>
+            <!-- Rule Setting Screen -->
+            <div id="rule-setting-screen" class="screen hidden">
+                <div class="rule-setting-container">
+                    <div style="max-width: 500px; margin: 0 auto; text-align: left; margin-bottom: 20px;">
+                        <button id="back-to-mode-from-rules-btn" class="back-btn">← もどる</button>
+                    </div>
+
+                    <h2 class="section-title">バトルのルールをきめよう</h2>
+
+                    <div class="rule-sections">
+                        <div class="rule-card">
+                            <h3>ゲームモード</h3>
+                            <select id="mode-select">
+                                <option value="full">フルモード (じゆうにえらぶ)</option>
+                                <option value="omakase">おまかせモード (ランダム)</option>
+                                <option value="type">タイプモード (タイプをえらぶ)</option>
+                            </select>
+                            <p class="rule-hint" id="mode-hint">すべてのポケモンからじゆうにえらべます</p>
+                        </div>
+
+                        <div id="rule-filter-settings" class="rule-card">
+                            <h3>しばり設定（すべてのプレイヤー）</h3>
+
+                            <div class="rule-accordion-group" id="region-accordion-group">
+                                <div class="rule-accordion-header accordion-trigger"
+                                    data-target="region-accordion-content">
+                                    <label class="rule-section-label">ちほう</label>
+                                    <div class="header-actions">
+                                        <button type="button" class="bulk-btn toggle-bulk-btn"
+                                            data-target="rule-region-checkboxes">全解除</button>
+                                        <span class="accordion-icon"></span>
+                                    </div>
+                                </div>
+                                <div class="rule-accordion-content" id="region-accordion-content">
+                                    <div class="checkbox-grid" id="rule-region-checkboxes">
+                                        <label class="checkbox-item"><input type="checkbox" value="gen1"
+                                                checked>カントー</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen2"
+                                                checked>ジョウト</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen3"
+                                                checked>ホウエン</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen4"
+                                                checked>シンオウ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen5"
+                                                checked>イッシュ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen6"
+                                                checked>カロス</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen6_za"
+                                                checked>カロス(ZA)</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen7"
+                                                checked>アローラ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen8"
+                                                checked>ガラル</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="gen9"
+                                                checked>パルデア</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="hisui"
+                                                checked>ヒスイ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="unknown"
+                                                checked>その他</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rule-accordion-group" id="type-accordion-group">
+                                <div class="rule-accordion-header accordion-trigger"
+                                    data-target="type-accordion-content">
+                                    <label class="rule-section-label">タイプ</label>
+                                    <div class="header-actions">
+                                        <button type="button" class="bulk-btn toggle-bulk-btn"
+                                            data-target="rule-type-checkboxes">全解除</button>
+                                        <span class="accordion-icon"></span>
+                                    </div>
+                                </div>
+                                <div class="rule-accordion-content" id="type-accordion-content">
+                                    <div class="checkbox-grid" id="rule-type-checkboxes">
+                                        <label class="checkbox-item"><input type="checkbox" value="normal"
+                                                checked>ノーマル</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="fire"
+                                                checked>ほのお</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="water"
+                                                checked>みず</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="electric"
+                                                checked>でんき</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="grass"
+                                                checked>くさ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="ice"
+                                                checked>こおり</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="fighting"
+                                                checked>かくとう</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="poison"
+                                                checked>どく</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="ground"
+                                                checked>じめん</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="flying"
+                                                checked>ひこう</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="psychic"
+                                                checked>エスパー</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="bug"
+                                                checked>むし</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="rock"
+                                                checked>いわ</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="ghost"
+                                                checked>ゴースト</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="dragon"
+                                                checked>ドラゴン</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="dark"
+                                                checked>あく</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="steel"
+                                                checked>はがね</label>
+                                        <label class="checkbox-item"><input type="checkbox" value="fairy"
+                                                checked>フェアリー</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="type-mode-settings" class="rule-card hidden">
+                            <h3>タイプモード ルール</h3>
+                            <div class="type-rule-item">
+                                <div class="rule-info">
+                                    <span class="rule-name">バトルのタイプ数</span>
+                                    <span class="rule-desc" id="battle-rule-desc">1つか2つのタイプでたたかいます</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="battle-rule-toggle" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="type-rule-item" id="constraint-selector-wrapper">
+                                <div class="rule-info">
+                                    <span class="rule-name">せんたくルール</span>
+                                    <span class="rule-desc" id="constraint-desc">1タイプだけでもOK</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="constraint-toggle">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-confirm-actions">
+                        <button id="start-selection-btn" class="action-btn next-btn">このルールで はじめる！</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pokemon Selection Grid -->
             <div id="selection-screen" class="screen hidden">
                 <div class="search-toggle-header">
+                    <button id="back-to-rules-btn" class="back-btn-small">← ルールをかえる</button>
                     <button id="toggle-search-btn" class="toggle-search-btn collapsed" onclick="toggleSearchSettings()">
-                        <span>メニュー</span>
+                        <span>条件（じょうけん）で さがす</span>
                         <span id="toggle-icon">▼</span>
                     </button>
                 </div>
@@ -101,70 +249,69 @@
                         </div>
                     </div>
                     <div class="pokemon-search-container">
-                        <select id="mode-select">
-                            <option value="full">フルモード</option>
-                            <option value="omakase">おまかせモード</option>
-                            <option value="type">タイプモード</option>
-                        </select>
-                        <select id="region-filter">
-                            <option value="all">すべてのちほう</option>
-                            <option value="gen1">カントー (1-151)</option>
-                            <option value="gen2">ジョウト (152-251)</option>
-                            <option value="gen3">ホウエン (252-386)</option>
-                            <option value="gen4">シンオウ (387-493)</option>
-                            <option value="gen5">イッシュ (494-649)</option>
-                            <option value="gen6">カロス (650-721)</option>
-                            <option value="gen6_za">カロス地方(ZA)</option>
-                            <option value="gen7">アローラ (722-807)</option>
-                            <option value="unknown">不明 (808-809)</option>
-                            <option value="gen8">ガラル (810-905)</option>
-                            <option value="gen9">パルデア (906-)</option>
-                            <option value="hisui">ヒスイ</option>
-                        </select>
-                        <select id="type1-filter">
-                            <option value="all">タイプ1</option>
-                            <option value="normal">ノーマル</option>
-                            <option value="fire">ほのお</option>
-                            <option value="water">みず</option>
-                            <option value="electric">でんき</option>
-                            <option value="grass">くさ</option>
-                            <option value="ice">こおり</option>
-                            <option value="fighting">かくとう</option>
-                            <option value="poison">どく</option>
-                            <option value="ground">じめん</option>
-                            <option value="flying">ひこう</option>
-                            <option value="psychic">エスパー</option>
-                            <option value="bug">むし</option>
-                            <option value="rock">いわ</option>
-                            <option value="ghost">ゴースト</option>
-                            <option value="dragon">ドラゴン</option>
-                            <option value="dark">あく</option>
-                            <option value="steel">はがね</option>
-                            <option value="fairy">フェアリー</option>
-                        </select>
-                        <select id="type2-filter">
-                            <option value="all">タイプ2</option>
-                            <option value="none">なし</option>
-                            <option value="normal">ノーマル</option>
-                            <option value="fire">ほのお</option>
-                            <option value="water">みず</option>
-                            <option value="electric">でんき</option>
-                            <option value="grass">くさ</option>
-                            <option value="ice">こおり</option>
-                            <option value="fighting">かくとう</option>
-                            <option value="poison">どく</option>
-                            <option value="ground">じめん</option>
-                            <option value="flying">ひこう</option>
-                            <option value="psychic">エスパー</option>
-                            <option value="bug">むし</option>
-                            <option value="rock">いわ</option>
-                            <option value="ghost">ゴースト</option>
-                            <option value="dragon">ドラゴン</option>
-                            <option value="dark">あく</option>
-                            <option value="steel">はがね</option>
-                            <option value="fairy">フェアリー</option>
-                        </select>
-                        <input type="text" id="pokemon-search" placeholder="ポケモンをけんさく" autocomplete="off">
+                        <div class="filter-controls">
+                            <select id="region-filter">
+                                <option value="all">すべてのちほう</option>
+                                <option value="gen1">カントー (1-151)</option>
+                                <option value="gen2">ジョウト (152-251)</option>
+                                <option value="gen3">ホウエン (252-386)</option>
+                                <option value="gen4">シンオウ (387-493)</option>
+                                <option value="gen5">イッシュ (494-649)</option>
+                                <option value="gen6">カロス (650-721)</option>
+                                <option value="gen6_za">カロス地方(ZA)</option>
+                                <option value="gen7">アローラ (722-807)</option>
+                                <option value="unknown">不明 (808-809)</option>
+                                <option value="gen8">ガラル (810-905)</option>
+                                <option value="gen9">パルデア (906-)</option>
+                                <option value="hisui">ヒスイ</option>
+                            </select>
+                            <div class="type-filters-wrapper">
+                                <select id="type1-filter">
+                                    <option value="all">タイプ1 (すべて)</option>
+                                    <option value="normal">ノーマル</option>
+                                    <option value="fire">ほのお</option>
+                                    <option value="water">みず</option>
+                                    <option value="electric">でんき</option>
+                                    <option value="grass">くさ</option>
+                                    <option value="ice">こおり</option>
+                                    <option value="fighting">かくとう</option>
+                                    <option value="poison">どく</option>
+                                    <option value="ground">じめん</option>
+                                    <option value="flying">ひこう</option>
+                                    <option value="psychic">エスパー</option>
+                                    <option value="bug">むし</option>
+                                    <option value="rock">いわ</option>
+                                    <option value="ghost">ゴースト</option>
+                                    <option value="dragon">ドラゴン</option>
+                                    <option value="dark">あく</option>
+                                    <option value="steel">はがね</option>
+                                    <option value="fairy">フェアリー</option>
+                                </select>
+                                <select id="type2-filter">
+                                    <option value="all">タイプ2 (すべて)</option>
+                                    <option value="none">なし</option>
+                                    <option value="normal">ノーマル</option>
+                                    <option value="fire">ほのお</option>
+                                    <option value="water">みず</option>
+                                    <option value="electric">でんき</option>
+                                    <option value="grass">くさ</option>
+                                    <option value="ice">こおり</option>
+                                    <option value="fighting">かくとう</option>
+                                    <option value="poison">どく</option>
+                                    <option value="ground">じめん</option>
+                                    <option value="flying">ひこう</option>
+                                    <option value="psychic">エスパー</option>
+                                    <option value="bug">むし</option>
+                                    <option value="rock">いわ</option>
+                                    <option value="ghost">ゴースト</option>
+                                    <option value="dragon">ドラゴン</option>
+                                    <option value="dark">あく</option>
+                                    <option value="steel">はがね</option>
+                                    <option value="fairy">フェアリー</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="text" id="pokemon-search" placeholder="ポケモンのなまえでけんさく" autocomplete="off">
                         <div id="search-suggestions" class="search-suggestions hidden"></div>
                     </div>
                 </div>
@@ -172,28 +319,6 @@
                     <!-- Javascript will populate this -->
                 </div>
                 <div class="type-selection-grid hidden" id="type-selection-grid">
-                    <div class="type-rules-container">
-                        <div class="type-rule-selector">
-                            <div class="rule-labels">
-                                <label class="rule-label" id="label-rule-single">1タイプ</label>
-                                <label class="rule-label" id="label-rule-double">2タイプ</label>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="battle-rule-toggle" checked>
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                        <div class="type-rule-selector" id="constraint-selector">
-                            <div class="rule-labels">
-                                <label class="rule-label" id="label-constraint-free">1タイプだけでもいいよ</label>
-                                <label class="rule-label" id="label-constraint-required">2タイプせんたくしてね</label>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="constraint-toggle">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
                     <button type="button" class="type-btn" data-type="normal">ノーマル</button>
                     <button type="button" class="type-btn" data-type="fire">ほのお</button>
                     <button type="button" class="type-btn" data-type="water">みず</button>
@@ -217,7 +342,6 @@
                     </div>
                     <button type="button" class="type-confirm-btn" id="type-confirm-btn">けってい</button>
                 </div>
-
             </div>
 
             <!-- Battle Screen -->
