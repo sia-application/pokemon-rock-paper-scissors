@@ -2595,6 +2595,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const startSelectionBtn = document.getElementById('start-selection-btn');
         if (startSelectionBtn) {
             startSelectionBtn.addEventListener('click', () => {
+                // Validation: At least one region must be selected (except in Type Mode)
+                if (currentMode !== 'type') {
+                    const checkedRegions = document.querySelectorAll('#rule-region-checkboxes input:checked');
+                    if (checkedRegions.length === 0) {
+                        alert('ちほうを 1つ以上 えらんでください！');
+                        // Open region accordion if closed
+                        const regionAccordion = document.getElementById('region-accordion-group');
+                        if (regionAccordion && !regionAccordion.classList.contains('open')) {
+                            const trigger = regionAccordion.querySelector('.accordion-trigger');
+                            if (trigger) trigger.click();
+                        }
+                        return;
+                    }
+                }
+
+                // Validation: At least one type must be selected
+                const checkedTypes = document.querySelectorAll('#rule-type-checkboxes input:checked');
+                if (checkedTypes.length === 0) {
+                    alert('タイプを 1つ以上 えらんでください！');
+                    // Open type accordion if closed
+                    const typeAccordion = document.getElementById('type-accordion-group');
+                    if (typeAccordion && !typeAccordion.classList.contains('open')) {
+                        const trigger = typeAccordion.querySelector('.accordion-trigger');
+                        if (trigger) trigger.click();
+                    }
+                    return;
+                }
+
                 showSelectionScreen();
                 if (isOnlineMode && isHost && conn) {
                     conn.send({ type: 'proceed_to_selection' });
@@ -2649,12 +2677,12 @@ document.addEventListener('DOMContentLoaded', () => {
         player1SelectedTypes = [];
         // --- Rule Setting Screen UI Updates ---
         const regionAccordion = document.getElementById('region-accordion-group');
-        const typeModeSettings = document.getElementById('type-mode-settings');
+        const typeModeAccordion = document.getElementById('type-mode-accordion-group');
 
         if (mode === 'type') {
-            // Type Mode Rules: Hide region selection, show type rules
+            // Type Mode Rules: Hide region selection, show type rules accordion
             if (regionAccordion) regionAccordion.classList.add('hidden');
-            if (typeModeSettings) typeModeSettings.classList.remove('hidden');
+            if (typeModeAccordion) typeModeAccordion.classList.remove('hidden');
 
             // Type Mode Selection: Show type grid, hide pokemon grid and filters
             if (pokemonGrid) pokemonGrid.classList.add('hidden');
@@ -2676,7 +2704,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Full or Omakase Mode: Reset Rule Settings UI
             if (regionAccordion) regionAccordion.classList.remove('hidden');
-            if (typeModeSettings) typeModeSettings.classList.add('hidden');
+            if (typeModeAccordion) typeModeAccordion.classList.add('hidden');
 
             // Selection screen updates
             if (pokemonGrid) pokemonGrid.classList.remove('hidden');

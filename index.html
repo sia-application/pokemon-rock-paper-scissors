@@ -143,6 +143,40 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Type Mode Rules Accordion (Hidden by default, shown in Type Mode) -->
+                            <div class="rule-accordion-group hidden" id="type-mode-accordion-group">
+                                <div class="rule-accordion-header accordion-trigger"
+                                    data-target="type-mode-accordion-content">
+                                    <label class="rule-section-label">タイプモード ルール</label>
+                                    <div class="header-actions">
+                                        <span class="accordion-icon"></span>
+                                    </div>
+                                </div>
+                                <div class="rule-accordion-content" id="type-mode-accordion-content">
+                                    <div class="type-rule-item">
+                                        <div class="rule-info">
+                                            <span class="rule-name">バトルのタイプ数</span>
+                                            <span class="rule-desc" id="battle-rule-desc">1つか2つのタイプでたたかいます</span>
+                                        </div>
+                                        <div class="segmented-control" id="battle-rule-buttons">
+                                            <button type="button" class="segment-btn" data-value="single">1タイプ</button>
+                                            <button type="button" class="segment-btn active"
+                                                data-value="double">2タイプ</button>
+                                        </div>
+                                    </div>
+                                    <div class="type-rule-item" id="constraint-selector-wrapper">
+                                        <div class="rule-info">
+                                            <span class="rule-name">せんたくルール</span>
+                                            <span class="rule-desc" id="constraint-desc">1タイプだけでもOK</span>
+                                        </div>
+                                        <div class="segmented-control" id="constraint-buttons">
+                                            <button type="button" class="segment-btn active"
+                                                data-value="false">1つでもOK</button>
+                                            <button type="button" class="segment-btn" data-value="true">2つ必須</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="rule-accordion-group" id="type-accordion-group">
                                 <div class="rule-accordion-header accordion-trigger"
                                     data-target="type-accordion-content">
@@ -197,29 +231,7 @@
                         </div>
 
 
-                        <div id="type-mode-settings" class="rule-card hidden">
-                            <h3>タイプモード ルール</h3>
-                            <div class="type-rule-item">
-                                <div class="rule-info">
-                                    <span class="rule-name">バトルのタイプ数</span>
-                                    <span class="rule-desc" id="battle-rule-desc">1つか2つのタイプでたたかいます</span>
-                                </div>
-                                <div class="segmented-control" id="battle-rule-buttons">
-                                    <button type="button" class="segment-btn" data-value="single">1タイプ</button>
-                                    <button type="button" class="segment-btn active" data-value="double">2タイプ</button>
-                                </div>
-                            </div>
-                            <div class="type-rule-item" id="constraint-selector-wrapper">
-                                <div class="rule-info">
-                                    <span class="rule-name">せんたくルール</span>
-                                    <span class="rule-desc" id="constraint-desc">1タイプだけでもOK</span>
-                                </div>
-                                <div class="segmented-control" id="constraint-buttons">
-                                    <button type="button" class="segment-btn active" data-value="false">1つでもOK</button>
-                                    <button type="button" class="segment-btn" data-value="true">2つ必須</button>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     <div class="rule-confirm-actions">
