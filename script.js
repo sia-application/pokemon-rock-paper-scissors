@@ -463,9 +463,11 @@ document.addEventListener('DOMContentLoaded', () => {
         selectionScreen.classList.remove('hidden');
         selectionScreen.classList.add('active');
 
+        // Update instruction text for both local and online modes
+        instructionText.textContent = 'ポケモンをえらぼう！';
+
         // Setup for online mode
         if (isOnlineMode) {
-            instructionText.textContent = 'ポケモンをえらぼう！';
 
             if (isHost) {
                 // Host is Trainer 1
@@ -645,6 +647,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ruleSettingScreen.classList.remove('active');
             ruleSettingScreen.classList.add('hidden');
         }
+
+        // Update instruction text
+        instructionText.textContent = 'バトルモードをえらぼう！';
     }
 
     // Show rule setting screen
@@ -1046,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
             onlineRoomScreen.classList.add('hidden');
             modeSelectionScreen.classList.remove('hidden');
             modeSelectionScreen.classList.add('active');
-            instructionText.textContent = 'たいせんモードをえらぼう！';
+            instructionText.textContent = 'バトルモードをえらぼう！';
 
             // Reset Create Room UI
             const createdRoomIdInput = document.getElementById('created-room-id-input');
@@ -3498,7 +3503,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateInstruction() {
-        instructionText.textContent = 'ポケモンをえらぼう！';
+        if (modeSelectionScreen.classList.contains('active')) {
+            instructionText.textContent = 'バトルモードをえらぼう！';
+        } else if (onlineRoomScreen.classList.contains('active')) {
+            instructionText.textContent = 'はなれたともだちとあそぼう！';
+        } else if (document.getElementById('rule-setting-screen').classList.contains('active')) {
+            instructionText.textContent = isOnlineMode ? 'あいてとルールをきめよう！' : 'ルールをきめよう！';
+        } else if (selectionScreen.classList.contains('active')) {
+            instructionText.textContent = 'ポケモンをえらぼう！';
+        }
     }
 
     function getRandomPokemon() {
