@@ -438,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show selection screen
     function showSelectionScreen() {
         window.scrollTo(0, 0);
+        syncSelectionFiltersWithRules();
 
         // Hide rule setting screen
         const ruleSettingScreen = document.getElementById('rule-setting-screen');
@@ -476,6 +477,87 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Guest (not host) cannot change mode/filters - disable them
                 disableFiltersForGuest();
             }
+        }
+    }
+
+    // Sync regional and type filter dropdowns with active rules
+    function syncSelectionFiltersWithRules() {
+        // --- Sync Region Filter ---
+        const regionFilter = document.getElementById('region-filter');
+        if (regionFilter) {
+            const currentRegion = regionFilter.value;
+            regionFilter.innerHTML = '';
+
+            const allRegOption = document.createElement('option');
+            allRegOption.value = 'all';
+            allRegOption.textContent = 'すべてのちほう';
+            regionFilter.appendChild(allRegOption);
+
+            ruleRegions.forEach(regionKey => {
+                if (REGION_LABELS[regionKey]) {
+                    const option = document.createElement('option');
+                    option.value = regionKey;
+                    option.textContent = REGION_LABELS[regionKey];
+                    regionFilter.appendChild(option);
+                }
+            });
+
+            const regOptions = Array.from(regionFilter.options).map(o => o.value);
+            regionFilter.value = regOptions.includes(currentRegion) ? currentRegion : 'all';
+        }
+
+        // --- Sync Type Filters ---
+        const type1Filter = document.getElementById('type1-filter');
+        const type2Filter = document.getElementById('type2-filter');
+
+        if (type1Filter && type2Filter) {
+            const currentType1 = type1Filter.value;
+            const currentType2 = type2Filter.value;
+
+            type1Filter.innerHTML = '';
+            type2Filter.innerHTML = '';
+
+            // Type 1 "All"
+            const allType1 = document.createElement('option');
+            allType1.value = 'all';
+            allType1.textContent = 'タイプ1 (すべて)';
+            type1Filter.appendChild(allType1);
+
+            // Type 2 "All" and "None"
+            const allType2 = document.createElement('option');
+            allType2.value = 'all';
+            allType2.textContent = 'タイプ2 (すべて)';
+            type2Filter.appendChild(allType2);
+
+            const noneType2 = document.createElement('option');
+            noneType2.value = 'none';
+            noneType2.textContent = 'なし';
+            type2Filter.appendChild(noneType2);
+
+            // Add permitted types
+            ruleTypes.forEach(typeKey => {
+                if (TYPE_LABELS[typeKey]) {
+                    // For Type 1
+                    const opt1 = document.createElement('option');
+                    opt1.value = typeKey;
+                    opt1.textContent = TYPE_LABELS[typeKey];
+                    type1Filter.appendChild(opt1);
+
+                    // For Type 2
+                    const opt2 = document.createElement('option');
+                    opt2.value = typeKey;
+                    opt2.textContent = TYPE_LABELS[typeKey];
+                    type2Filter.appendChild(opt2);
+                }
+            });
+
+            // Restore/Reset Type 1
+            const options1 = Array.from(type1Filter.options).map(o => o.value);
+            type1Filter.value = options1.includes(currentType1) ? currentType1 : 'all';
+
+            // Restore/Reset Type 2
+            const options2 = Array.from(type2Filter.options).map(o => o.value);
+            type2Filter.value = options2.includes(currentType2) ? currentType2 : 'all';
         }
     }
 
@@ -655,6 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.updateToggleLabels) window.updateToggleLabels('constraint-toggle');
             }
         }
+        syncSelectionFiltersWithRules();
     }
 
     // Cancel connection
@@ -818,6 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cb.checked = ruleRegions.includes(cb.value);
                 });
             }
+            syncSelectionFiltersWithRules();
         }
         if (data.ruleTypes !== undefined) {
             ruleTypes = data.ruleTypes;
@@ -827,6 +911,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cb.checked = ruleTypes.includes(cb.value);
                 });
             }
+            syncSelectionFiltersWithRules();
         }
     }
 
@@ -2272,6 +2357,42 @@ document.addEventListener('DOMContentLoaded', () => {
         'gen8': { min: 810, max: 905 },
         'gen9': { min: 906, max: 1025 },
         'hisui': { min: 899, max: 905 } // Special Handling usually, but adhering to IDs here
+    };
+
+    const REGION_LABELS = {
+        'gen1': 'カントー (1-151)',
+        'gen2': 'ジョウト (152-251)',
+        'gen3': 'ホウエン (252-386)',
+        'gen4': 'シンオウ (387-493)',
+        'gen5': 'イッシュ (494-649)',
+        'gen6': 'カロス (650-721)',
+        'gen6_za': 'カロス地方(ZA)',
+        'gen7': 'アローラ (722-807)',
+        'unknown': '不明 (808-809)',
+        'gen8': 'ガラル (810-905)',
+        'gen9': 'パルデア (906-)',
+        'hisui': 'ヒスイ'
+    };
+
+    const TYPE_LABELS = {
+        'normal': 'ノーマル',
+        'fire': 'ほのお',
+        'water': 'みず',
+        'electric': 'でんき',
+        'grass': 'くさ',
+        'ice': 'こおり',
+        'fighting': 'かくとう',
+        'poison': 'どく',
+        'ground': 'じめん',
+        'flying': 'ひこう',
+        'psychic': 'エスパー',
+        'bug': 'むし',
+        'rock': 'いわ',
+        'ghost': 'ゴースト',
+        'dragon': 'ドラゴン',
+        'dark': 'あく',
+        'steel': 'はがね',
+        'fairy': 'フェアリー'
     };
 
     // -- Init --
