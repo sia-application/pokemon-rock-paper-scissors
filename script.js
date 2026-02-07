@@ -3364,7 +3364,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchesName = pokemon.name.toLowerCase().includes(query);
 
             // Check region rule
-            const region = getRegionFromId(pokemon.id);
+            // Check region rule
+            const region = getRegionFromId(pokemon.id, pokemon.name);
             const matchesRegion = ruleRegions.includes(region);
 
             // Check type rule (at least one type must be allowed)
@@ -3380,16 +3381,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function getRegionFromId(id) {
-        // Handle Mega Evolutions and Regional Forms (often 10xxx)
-        // If ID > 10000, it's a form. We should map it to base form ID or region.
-        // For simplicity, let's treat them as "unknown" or map to base.
-        // We don't have base ID mapping easily here without lookup.
-        // Let's allow them if 'unknown' is checked OR map them to their generation if possible.
-        // Most 10xxx IDs are Gen 6 (Mega), Gen 7 (Alola form), Gen 8 (Galar form), Gen 9 (Paldea form).
-        // It's complex to map perfectly without data.
-        // Let's iterate ranges for standard IDs.
+    function getRegionFromId(id, pokemonName) {
+        // Handle Regional Forms by Name
+        if (pokemonName) {
+            if (pokemonName.includes('アローラのすがた')) return 'gen7';
+            if (pokemonName.includes('ガラルのすがた')) return 'gen8';
+            if (pokemonName.includes('ヒスイのすがた')) return 'hisui';
+            if (pokemonName.includes('パルデアのすがた')) return 'gen9';
+            if (pokemonName.includes('メガ')) return 'gen6';
+        }
 
+        // Handle high IDs (Megas/Forms not caught by name or without distinctive name)
         if (id > 10000) return 'unknown';
 
         for (const [key, range] of Object.entries(GENERATION_RANGES)) {
