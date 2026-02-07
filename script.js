@@ -535,13 +535,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Type 1 "All"
             const allType1 = document.createElement('option');
             allType1.value = 'all';
-            allType1.textContent = 'タイプ1 (すべて)';
+            allType1.textContent = 'タイプ1';
             type1Filter.appendChild(allType1);
 
             // Type 2 "All" and "None"
             const allType2 = document.createElement('option');
             allType2.value = 'all';
-            allType2.textContent = 'タイプ2 (すべて)';
+            allType2.textContent = 'タイプ2';
             type2Filter.appendChild(allType2);
 
             const noneType2 = document.createElement('option');
