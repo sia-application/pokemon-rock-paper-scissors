@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokemon-rps-v12';
+const CACHE_NAME = 'pokemon-rps-v13';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

@@ -2112,18 +2112,20 @@ body.omakase-active .card-close-btn {
 .checkbox-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-size: 0.9rem;
     font-weight: bold;
     color: #444;
     cursor: pointer;
     background: white;
-    padding: 8px 12px;
+    padding: 8px 10px;
     border: 2px solid #eee;
     border-radius: 12px;
     transition: all 0.2s;
     user-select: none;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .checkbox-item:hover {
@@ -2147,6 +2149,12 @@ body.omakase-active .card-close-btn {
 @media (max-width: 500px) {
     .checkbox-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .checkbox-item {
+        font-size: 0.8rem;
+        padding: 6px 8px;
     }
 }
 
@@ -2161,14 +2169,15 @@ body.omakase-active .card-close-btn {
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
-    padding: 15px 40px;
+    padding: 15px 20px;
     border-radius: 50px;
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
     transition: all 0.3s ease;
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
+    white-space: nowrap;
 }
 
 .next-btn:hover {
