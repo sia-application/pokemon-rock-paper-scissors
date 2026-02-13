@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn && container) {
             const checkboxes = container.querySelectorAll('input');
             const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            btn.textContent = (checkedCount === checkboxes.length) ? '全解除' : '全選択';
+            btn.textContent = (checkedCount === checkboxes.length) ? 'ぜんぶ' : 'ぜんぶ';
         }
     }
 
@@ -1094,10 +1094,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             copyRoomIdBtn.textContent = 'コピー';
                         }, 2000);
                     } else {
-                        alert('コピーできませんでした。手動でコピーしてください: ' + text);
+                        alert('コピーできませんでした。しゅどうでコピーしてください: ' + text);
                     }
                 } catch (err) {
-                    alert('コピーできませんでした。手動でコピーしてください: ' + text);
+                    alert('コピーできませんでした。しゅどうでコピーしてください: ' + text);
                 }
 
                 document.body.removeChild(textArea);
@@ -2470,9 +2470,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'gen4': 'シンオウ (387-493)',
         'gen5': 'イッシュ (494-649)',
         'gen6': 'カロス (650-721)',
-        'gen6_za': 'カロス地方(ZA)',
-        'gen7': 'アローラ (722-807)',
-        'unknown': '不明 (808-809)',
+        'gen6_za': 'カロス(ZA)',
+        'gen7': 'アローラ(722-807)',
+        'unknown': 'ふめい (808-809)',
         'gen8': 'ガラル (810-905)',
         'gen9': 'パルデア (906-)',
         'hisui': 'ヒスイ'
@@ -2550,7 +2550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const updateButtonLabel = () => {
                     const checkboxes = container.querySelectorAll('input');
                     const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-                    btn.textContent = (checkedCount === checkboxes.length) ? '全解除' : '全選択';
+                    btn.textContent = (checkedCount === checkboxes.length) ? 'ぜんぶ' : 'ぜんぶ';
                 };
 
                 btn.addEventListener('click', () => {
@@ -2737,7 +2737,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentMode !== 'type') {
                     const checkedRegions = document.querySelectorAll('#rule-region-checkboxes input:checked');
                     if (checkedRegions.length === 0) {
-                        alert('ちほうを 1つ以上 えらんでください！');
+                        alert('ちほうを 1ついじょう えらんでください！');
                         // Open region accordion if closed
                         const regionAccordion = document.getElementById('region-accordion-group');
                         if (regionAccordion && !regionAccordion.classList.contains('open')) {
@@ -2751,7 +2751,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Validation: At least one type must be selected
                 const checkedTypes = document.querySelectorAll('#rule-type-checkboxes input:checked');
                 if (checkedTypes.length === 0) {
-                    alert('タイプを 1つ以上 えらんでください！');
+                    alert('タイプを 1ついじょう えらんでください！');
                     // Open type accordion if closed
                     const typeAccordion = document.getElementById('type-accordion-group');
                     if (typeAccordion && !typeAccordion.classList.contains('open')) {
@@ -2764,7 +2764,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Validation: For "2 Types Required" rule, at least 2 types must be available
                 if (currentMode === 'type' && typeBattleMode === 'double' && isDoubleTypeRequired) {
                     if (checkedTypes.length < 2) {
-                        alert('「2つ必須」のルールでは、タイプを 2つ以上 有効にしてください！');
+                        alert('「2つえらぶ」のルールでは、タイプを 2ついじょう ゆうこうにしてください！');
                         // Open type accordion if closed
                         const typeAccordion = document.getElementById('type-accordion-group');
                         if (typeAccordion && !typeAccordion.classList.contains('open')) {
@@ -2786,7 +2786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (backToRulesBtn) {
             backToRulesBtn.addEventListener('click', () => {
                 if (isOnlineMode) {
-                    if (confirm('ルール設定に戻りますか？現在の選択はリセットされます。')) {
+                    if (confirm('ルールせっていに もどりますか？ いまえらんだのは リセットされます。')) {
                         // Send message to peer (Host or Guest)
                         if (conn) {
                             conn.send({ type: 'back_to_rules' });
@@ -2823,7 +2823,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mode === 'full') {
                 modeHint.textContent = 'すべてのポケモンからじゆうにえらんでバトル';
             } else if (mode === 'omakase') {
-                modeHint.textContent = 'ランダムにえらばれた1体でバトル';
+                modeHint.textContent = 'ランダムにえらばれた1たいでバトル';
             } else if (mode === 'type') {
                 modeHint.textContent = 'タイプをえらんでバトル';
             }
@@ -2977,7 +2977,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isDoubleTypeRequired = isRequired;
         const desc = document.getElementById('constraint-desc');
         if (desc) {
-            desc.textContent = isRequired ? '2タイプともルールに合わないとダメ' : '1タイプだけでもOK';
+            desc.textContent = isRequired ? '2タイプかならずえらぶ' : '1タイプだけでもOK';
         }
         updateSegmentedControlState('constraint-buttons', isRequired.toString());
     }
@@ -2986,7 +2986,7 @@ document.addEventListener('DOMContentLoaded', () => {
         damageCalculationMethod = method;
         const desc = document.getElementById('calc-method-desc');
         if (desc) {
-            desc.textContent = (method === 'multiply') ? 'こうかを かけ算 します' : 'こうかを たし算 します';
+            desc.textContent = (method === 'multiply') ? 'こうかをかけざんします' : 'こうかをたしざんします';
         }
         updateSegmentedControlState('calc-method-buttons', method);
     }

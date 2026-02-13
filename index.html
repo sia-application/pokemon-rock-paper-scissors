@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ポケモンタイプじゃんけん</title>
-    <link rel="stylesheet" href="style.css?v=2.2.7">
+    <link rel="stylesheet" href="style.css?v=2.2.9">
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -99,7 +99,7 @@
                         </div>
 
                         <div id="rule-filter-settings" class="rule-card">
-                            <h3>設定</h3>
+                            <h3>ルール</h3>
 
                             <div class="rule-accordion-group" id="calc-accordion-group">
                                 <div class="rule-accordion-header accordion-trigger"
@@ -112,7 +112,7 @@
                                 <div class="rule-accordion-content" id="calc-accordion-content">
                                     <div class="type-rule-item">
                                         <div class="rule-info">
-                                            <span class="rule-desc" id="calc-method-desc">こうかを かけ算 します</span>
+                                            <span class="rule-desc" id="calc-method-desc">こうかをかけざんします</span>
                                         </div>
                                         <div class="segmented-control" id="calc-method-buttons">
                                             <button type="button" class="segment-btn active"
@@ -128,7 +128,7 @@
                                     <label class="rule-section-label">ちほう</label>
                                     <div class="header-actions">
                                         <button type="button" class="bulk-btn toggle-bulk-btn"
-                                            data-target="rule-region-checkboxes">全解除</button>
+                                            data-target="rule-region-checkboxes">ぜんぶ</button>
                                         <span class="accordion-icon"></span>
                                     </div>
                                 </div>
@@ -157,7 +157,7 @@
                                         <label class="checkbox-item"><input type="checkbox" value="hisui"
                                                 checked>ヒスイ</label>
                                         <label class="checkbox-item"><input type="checkbox" value="unknown"
-                                                checked>その他</label>
+                                                checked>そのた</label>
                                     </div>
                                 </div>
                             </div>
@@ -174,8 +174,8 @@
                                 <div class="rule-accordion-content" id="type-mode-accordion-content">
                                     <div class="type-rule-item">
                                         <div class="rule-info">
-                                            <span class="rule-name">バトルのタイプ数</span>
-                                            <span class="rule-desc" id="battle-rule-desc">1つか2つのタイプでたたかいます</span>
+                                            <span class="rule-name">タイプをえらぶかず</span>
+                                            <span class="rule-desc" id="battle-rule-desc">えらんだタイプのかずでバトル</span>
                                         </div>
                                         <div class="segmented-control" id="battle-rule-buttons">
                                             <button type="button" class="segment-btn" data-value="single">1タイプ</button>
@@ -191,7 +191,7 @@
                                         <div class="segmented-control" id="constraint-buttons">
                                             <button type="button" class="segment-btn active"
                                                 data-value="false">1つでもOK</button>
-                                            <button type="button" class="segment-btn" data-value="true">2つ必須</button>
+                                            <button type="button" class="segment-btn" data-value="true">2つえらぶ</button>
                                         </div>
                                     </div>
 
@@ -203,7 +203,7 @@
                                     <label class="rule-section-label">タイプ</label>
                                     <div class="header-actions">
                                         <button type="button" class="bulk-btn toggle-bulk-btn"
-                                            data-target="rule-type-checkboxes">全解除</button>
+                                            data-target="rule-type-checkboxes">ぜんぶ</button>
                                         <span class="accordion-icon"></span>
                                     </div>
                                 </div>
@@ -286,9 +286,9 @@
                                 <option value="gen4">シンオウ (387-493)</option>
                                 <option value="gen5">イッシュ (494-649)</option>
                                 <option value="gen6">カロス (650-721)</option>
-                                <option value="gen6_za">カロス地方(ZA)</option>
-                                <option value="gen7">アローラ (722-807)</option>
-                                <option value="unknown">不明 (808-809)</option>
+                                <option value="gen6_za">カロス(ZA)</option>
+                                <option value="gen7">アローラ(722-807)</option>
+                                <option value="unknown">ふめい (808-809)</option>
                                 <option value="gen8">ガラル (810-905)</option>
                                 <option value="gen9">パルデア (906-)</option>
                                 <option value="hisui">ヒスイ</option>
@@ -412,7 +412,7 @@
         </main>
 
         <footer class="app-footer">
-            <p>made for sia v2.2.8</p>
+            <p>made for sia v2.3.0</p>
         </footer>
     </div>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -422,7 +422,7 @@
         function handleAppUpdate(e) {
             if (e) e.preventDefault();
 
-            if (confirm('アプリを再起動して、最新の状態にしますか？\n（オフラインデータも一度リセットされます）')) {
+            if (confirm('アプリをさいきどうして、さいしんのじょうたいにしますか？\n（オフラインデータもいちどリセットされます）')) {
                 // Unregister Service Worker
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function (registrations) {

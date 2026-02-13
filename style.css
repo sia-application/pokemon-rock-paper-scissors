@@ -1907,10 +1907,11 @@ body.omakase-active .card-close-btn {
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background: #f9f9f9;
+    background: #fdfdfd;
     border-radius: 15px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     border: 2px solid #eee;
+    gap: 15px;
 }
 
 .type-rule-item:last-child {
@@ -1955,10 +1956,37 @@ body.omakase-active .card-close-btn {
     opacity: 0.6;
 }
 
+@media (max-width: 500px) {
+    .type-rule-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .rule-info {
+        width: 100%;
+    }
+
+    .segmented-control {
+        width: 100%;
+        background: #f0f0f0;
+    }
+
+    .segment-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 5px;
+        font-size: 0.8rem;
+    }
+}
+
 .rule-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
+    min-width: 0;
 }
 
 .rule-name {
