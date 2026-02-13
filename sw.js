@@ -7,8 +7,7 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './images/icon-192.png',
     './images/icon-512.png',
-    'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
-    'https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap'
+    'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
 ];
 
 self.addEventListener('install', (event) => {
