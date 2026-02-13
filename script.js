@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isHost = false;
         isOnlineMode = true;
-        roomId = targetRoomId.trim();
+        roomId = targetRoomId.trim().toUpperCase();
 
         showConnectionStatus('おへやにせつぞくちゅう...');
 
@@ -721,18 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('mode-select').value = data.mode;
             handleModeChange({ target: { value: data.mode }, fromPeer: true });
         }
-        if (data.region !== undefined) {
-            document.getElementById('region-filter').value = data.region;
-            handleRegionChange({ target: { value: data.region }, fromPeer: true });
-        }
-        if (data.type1 !== undefined) {
-            document.getElementById('type1-filter').value = data.type1;
-            handleType1Change({ target: { value: data.type1 }, fromPeer: true });
-        }
-        if (data.type2 !== undefined) {
-            document.getElementById('type2-filter').value = data.type2;
-            handleType2Change({ target: { value: data.type2 }, fromPeer: true });
-        }
+
         if (data.battleRule !== undefined) {
             applyBattleRuleChange(data.battleRule === 'double');
         }
@@ -1074,7 +1063,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (joinRoomBtn) {
         joinRoomBtn.addEventListener('click', () => {
-            joinRoom(roomIdInput.value.trim());
+            const val = roomIdInput.value.trim().toUpperCase();
+            joinRoom(val);
         });
     }
 
@@ -1134,12 +1124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelConnectionBtn.addEventListener('click', cancelConnection);
     }
 
-    // Room ID input: auto uppercase
-    if (roomIdInput) {
-        roomIdInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.toUpperCase();
-        });
-    }
+
 
     // -- Data --
     const pokemonData = [
@@ -2929,9 +2914,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentRegionFilter = e.target.value;
         const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
 
-        if (!fromPeer) {
-            sendSettingsChange('region', currentRegionFilter);
-        }
+
 
         pokemonSearchInput.value = '';
         applyAllFilters();
@@ -3288,9 +3271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentType1Filter = e.target.value;
         const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
 
-        if (!fromPeer) {
-            sendSettingsChange('type1', currentType1Filter);
-        }
+
 
         pokemonSearchInput.value = '';
         applyAllFilters();
@@ -3300,9 +3281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentType2Filter = e.target.value;
         const fromPeer = e.fromPeer || (e.detail && e.detail.fromPeer);
 
-        if (!fromPeer) {
-            sendSettingsChange('type2', currentType2Filter);
-        }
+
 
         pokemonSearchInput.value = '';
         applyAllFilters();
